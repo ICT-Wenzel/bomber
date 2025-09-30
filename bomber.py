@@ -5,7 +5,7 @@ from datetime import datetime
 #import os
 
 # .env laden
-load_dotenv()
+#load_dotenv()
 
 #webhook = os.getenv("WEBHOOK_URL")
 webhook = st.secrets["WEBHOOK_URL"]
