@@ -102,7 +102,7 @@ if st.session_state.view == "dashboard":
                     .stButton > button {{
                         display: block;
                         width: 100%;
-                        padding: 12px 0;
+                        padding: 12px;
                         margin-top: 2px;
                         font-size: 2.1em;
                         font-weight: bold;
