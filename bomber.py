@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 from datetime import datetime
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 #import os
 
 # .env laden
