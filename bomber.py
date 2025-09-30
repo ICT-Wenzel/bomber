@@ -2,13 +2,13 @@ import streamlit as st
 import requests
 from datetime import datetime
 from dotenv import load_dotenv
-import os
+#import os
 
 # .env laden
 load_dotenv()
 
-webhook = os.getenv("WEBHOOK_URL")
-
+#webhook = os.getenv("WEBHOOK_URL")
+webhook = st.secrets["WEBHOOK_URL"]
 # Bot Konfigurationen
 BOTS = {
     "normal": {
