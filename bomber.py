@@ -217,7 +217,7 @@ elif st.session_state.view == "chat":
             response = requests.post(
                 bot["webhook"],
                 json={"frage": f"{prompt} \n Es wird eine Nachricht für folgenden Bot verlangt: {bot['name']}"},
-                timeout=60
+                timeout=180
             )
             response.raise_for_status()
             bot_content = response.text.strip() if response.text else "Keine Antwort erhalten."
