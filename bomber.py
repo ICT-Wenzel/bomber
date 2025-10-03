@@ -53,6 +53,8 @@ if st.session_state.view == "dashboard":
             bot = BOTS[bot_key].to_config()
             with cols[j]:
                 bot = BOTS[bot_key].to_config()
+                # Wrapper um Karte + Button für gezieltes Styling
+                st.markdown('<div class="bot-card-wrap">', unsafe_allow_html=True)
 
                 # Bot-Karte
                 st.markdown(
@@ -106,6 +108,13 @@ if st.session_state.view == "dashboard":
                         font-weight: 700;
                         font-size: 0.9rem;
                     }}
+                    /* Button in diesem Wrap so hoch wie die Karte */
+                    .bot-card-wrap .stButton > button {{
+                        height: 160px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }}
                     .stButton > button {{
                         display: block;
                         width: 100%;
@@ -147,6 +156,8 @@ if st.session_state.view == "dashboard":
                     st.session_state.active_bot = bot_key
                     st.session_state.view = "chat"
                     st.rerun()
+
+                st.markdown("</div>", unsafe_allow_html=True)
 
 
 # ---------------- Chat Ansicht ----------------
