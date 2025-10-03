@@ -27,6 +27,8 @@ if st.session_state.view == "dashboard":
         """, unsafe_allow_html=True)
 
     bots_list = list(BOTS.keys())
+    if not bots_list:
+        st.warning("Keine Bots gefunden. Füge neue Bots unter `bots/` hinzu.")
     # Zeilenweise Anzeige, immer 4 Spalten
     for i in range(0, len(bots_list), 3):
         cols = st.columns(3)
@@ -178,16 +180,23 @@ elif st.session_state.view == "chat":
         st.chat_message("user").markdown(f"**Du:** {prompt}\n\n_{user_message['timestamp']}_")
 
         # Bot-Antwort nur bei User-Request
-        try:
-            response = requests.post(
-                bot["webhook"],
-                json={"frage": f"{prompt} \n Es wird eine Nachricht für folgenden Bot verlangt: {bot['name']}"},
-                timeout=180
+        webhook_url = bot.get("webhook")
+        if not webhook_url:
+            bot_content = (
+                "❌ Kein Webhook konfiguriert. Bitte setze `WEBHOOK_URL_" + bot_key.upper() +
+                "` oder `WEBHOOK_URL` in den Secrets/Umgebungsvariablen."
             )
-            response.raise_for_status()
-            bot_content = response.text.strip() if response.text else "Keine Antwort erhalten."
-        except Exception as e:
-            bot_content = f"❌ Anfrage fehlgeschlagen: {e}"
+        else:
+            try:
+                response = requests.post(
+                    webhook_url,
+                    json={"frage": f"{prompt} \n Es wird eine Nachricht für folgenden Bot verlangt: {bot['name']}"},
+                    timeout=180
+                )
+                response.raise_for_status()
+                bot_content = response.text.strip() if response.text else "Keine Antwort erhalten."
+            except Exception as e:
+                bot_content = f"❌ Anfrage fehlgeschlagen: {e}"
 
         bot_message = {
             "id": str(len(st.session_state.messages[bot_key]) + 1),
