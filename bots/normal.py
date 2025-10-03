@@ -11,4 +11,8 @@ class NormalBot(BaseBot):
     emoji = "🌍"
     color = "#4A4A4A"
 
+    # Example: override UI or behavior here if needed
+    # def render_chat(self) -> None:
+    #     super().render_chat()
+
 

@@ -8,7 +8,7 @@ from typing import Dict
 from .base import BaseBot
 
 
-def discover_bots() -> Dict[str, dict]:
+def discover_bots() -> Dict[str, BaseBot]:
     """Discover bot subclasses in the current package and return config mapping.
 
     Each module under bots/ that defines a subclass of BaseBot with a non-empty
@@ -17,7 +17,7 @@ def discover_bots() -> Dict[str, dict]:
     bots_dir = Path(__file__).parent
     package_name = __package__ or "bots"
 
-    configs: Dict[str, dict] = {}
+    instances: Dict[str, BaseBot] = {}
 
     for module_info in iter_modules([str(bots_dir)]):
         name = module_info.name
@@ -30,8 +30,7 @@ def discover_bots() -> Dict[str, dict]:
                 bot: BaseBot = attr()
                 if not bot.id:
                     continue
-                configs[bot.id] = bot.to_config()
-
-    return configs
+                instances[bot.id] = bot
+    return instances
 
 
