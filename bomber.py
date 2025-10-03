@@ -1,45 +1,10 @@
 import streamlit as st
 import requests
 from datetime import datetime
-#from dotenv import load_dotenv
-#import os
+from bots.registry import discover_bots
 
-# .env laden
-#load_dotenv()
-
-#webhook = os.getenv("WEBHOOK_URL")
-webhook = st.secrets["WEBHOOK_URL"]
-# Bot Konfigurationen
-BOTS = {
-    "normal": {
-        "name": "General AI Assistant",
-        "description": "Get help with general questions, writing, coding, and creative tasks. Like ChatGPT but customized for our organization.",
-        "webhook": webhook,
-        "emoji": "🌍",
-        "color": "#4A4A4A",  # Grau
-    },
-    "internwiki": {
-        "name": "Internal Wiki Bot",
-        "description": "Search and get answers from our internal knowledge base, documentation, and company resources.",
-        "webhook": webhook,
-        "emoji": "📚",
-        "color": "#4A4A4A",  # Grau
-    },
-    "documentation": {
-        "name": "Documentation Bot",
-        "description": "Assist with finding and retrieving documentation, guides, and API references.",
-        "webhook": webhook,
-        "emoji": "📄",
-        "color": "#4A4A4A",  # Grau
-    },
-    "tickets": {
-        "name": "Ticket Analyzer",
-        "description": "Analyze support tickets, extract insights, categorize issues, and suggest solutions based on historical data.",
-        "webhook":webhook,
-        "emoji": "🎟️",
-        "color": "#4A4A4A",  # Grau
-    },
-}
+# Discover bots dynamically from the bots package
+BOTS = discover_bots()
 
 st.set_page_config(page_title="Chatbot Dashboard", page_icon="🤖", layout="wide")
 
