@@ -71,7 +71,7 @@ if st.session_state.view == "dashboard":
                         margin-bottom: 10px;
                         overflow: hidden;
                         transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-                        height: 160px;
+                        height: 200px;
                         width: 100%;
                         display: flex;
                         flex-direction: column;
