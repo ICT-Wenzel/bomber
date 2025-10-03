@@ -70,39 +70,83 @@ class BaseBot:
 
         st.markdown(f"""
             <style>
-            .chat-glossy-box {{
-                background: linear-gradient(135deg, #232526 0%, #1f9fec 100%);
+            .chat-container {{
+                background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+                border: 1px solid rgba(255,255,255,0.08);
                 border-radius: 18px;
-                box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-                padding: 32px 28px 24px 28px;
-                margin-bottom: 28px;
-                margin-top: 32px;
+                box-shadow: 0 10px 32px rgba(0,0,0,0.35);
+                padding: 22px 22px 14px 22px;
+                margin: 26px 0 20px 0;
+                position: relative;
+                overflow: hidden;
             }}
-            .chat-glossy-box h1, .chat-glossy-box p {{
-                color: #fff !important;
-                text-shadow: 0 2px 8px rgba(0,0,0,0.45);
+            .chat-container::before {{
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(140% 140% at 0% 0%, rgba(31,159,236,0.2) 0%, rgba(110,231,183,0.12) 50%, rgba(122,92,255,0.12) 100%);
+                pointer-events: none;
+            }}
+            .chat-header {{
+                margin: 0 0 8px 0;
+                color: #e9eef4;
+                font-weight: 900;
+                font-size: 1.8rem;
+                letter-spacing: 0.2px;
+            }}
+            .chat-sub {{
+                margin: 0 0 8px 0;
+                color: #c5ced8;
+                font-weight: 500;
+            }}
+            .bubble-user {{
+                background: linear-gradient(135deg, #93C5FD 0%, #6EE7B7 100%);
+                color: #0b1020;
+                padding: 12px 14px;
+                border-radius: 14px;
+                margin: 6px 0;
+                display: inline-block;
+                max-width: 92%;
+                font-weight: 600;
+                box-shadow: 0 4px 12px rgba(31,159,236,0.25);
+            }}
+            .bubble-assistant {{
+                background: rgba(255,255,255,0.06);
+                color: #e9eef4;
+                padding: 12px 14px;
+                border-radius: 14px;
+                margin: 6px 0;
+                display: inline-block;
+                max-width: 92%;
+                border: 1px solid rgba(255,255,255,0.08);
+            }}
+            .chat-row {{ display: flex; margin: 6px 0; }}
+            .chat-row.user {{ justify-content: flex-end; }}
+            .chat-row.assistant {{ justify-content: flex-start; }}
+            .chat-row .time {{
+                font-size: 0.75rem; color: #aeb6bf; margin: 2px 6px;
             }}
             .stButton > button {{
                 display: inline-block;
                 padding: 10px 22px;
-                font-size: 1.1em;
-                font-weight: bold;
-                color: #fff !important;
-                background: linear-gradient(135deg, #232526 0%, #1f9fec 100%) !important;
+                font-size: 1.05rem;
+                font-weight: 800;
+                color: #0b1020 !important;
+                background: linear-gradient(135deg, #6EE7B7 0%, #93C5FD 80%) !important;
                 border: none !important;
-                border-radius: 10px !important;
+                border-radius: 12px !important;
                 cursor: pointer;
-                box-shadow: 0 2px 8px rgba(31,159,236,0.15);
-                transition: background 0.2s, transform 0.2s;
+                box-shadow: 0 4px 12px rgba(31,159,236,0.25);
+                transition: background 0.25s ease, transform 0.15s ease;
             }}
             .stButton > button:hover {{
-                background: linear-gradient(135deg, #1f9fec 0%, #6EE7B7 100%) !important;
-                transform: scale(1.05);
+                background: linear-gradient(135deg, #93C5FD 0%, #6EE7B7 80%) !important;
+                transform: translateY(-1px) scale(1.01);
             }}
             </style>
-            <div class="chat-glossy-box">
-                <h1 style='font-size: 2.2em; margin-bottom:0; color: #fff; font-weight: 900; text-shadow: 0 2px 12px rgba(0,0,0,0.65);'>{self.name}</h1>
-                <p style='font-size: 1.1em; margin-top:0; font-weight:500; color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,0.65);'>{self.description}</p>
+            <div class="chat-container">
+                <h1 class="chat-header">{self.name}</h1>
+                <p class="chat-sub">{self.description}</p>
             </div>
         """, unsafe_allow_html=True)
 
@@ -123,10 +167,12 @@ class BaseBot:
             ]
 
         for msg in st.session_state.messages[bot_key]:
-            if msg["isUser"]:
-                st.chat_message("user").markdown(f"**Du:** {msg['content']}\n\n_{msg['timestamp']}_")
-            else:
-                st.chat_message("assistant").markdown(f"{msg['content']}\n\n_{msg['timestamp']}_")
+            role = "user" if msg["isUser"] else "assistant"
+            bubble_class = "bubble-user" if msg["isUser"] else "bubble-assistant"
+            st.markdown(
+                f"<div class='chat-row {role}'><div class='{bubble_class}'>{msg['content']}</div><span class='time'>{msg['timestamp']}</span></div>",
+                unsafe_allow_html=True,
+            )
 
         if prompt := st.chat_input("Schreibe eine Nachricht..."):
             user_message = {
