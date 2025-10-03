@@ -112,7 +112,7 @@ if st.session_state.view == "dashboard":
                         padding: 12px;
                         margin-top: 6px;
                         font-size: 1.1rem;
-                        font-weight: 800;
+                        font-weight: 1000;
                         color: #0b1020 !important;
                         background: linear-gradient(135deg, #6EE7B7 0%, #93C5FD 80%) !important;
                         border: none !important;
