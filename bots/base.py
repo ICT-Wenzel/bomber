@@ -1,3 +1,5 @@
+from typing import Optional
+
 class BaseBot:
     """Base class for all bots.
 
@@ -10,9 +12,9 @@ class BaseBot:
     description: str = ""
     emoji: str = "🤖"
     color: str = "#4A4A4A"
-    secrets_key: str | None = None
+    secrets_key: Optional[str] = None
 
-    def resolve_webhook(self) -> str | None:
+    def resolve_webhook(self) -> Optional[str]:
         """Resolve webhook URL from Streamlit secrets or environment.
 
         Order:
@@ -70,7 +72,7 @@ class BaseBot:
 
         st.markdown(f"""
             <style>
-            .chat-container {
+            .chat-container {{
                 background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
                 border: 1px solid rgba(255,255,255,0.08);
                 border-radius: 18px;
@@ -79,28 +81,28 @@ class BaseBot:
                 margin: 26px 0 20px 0;
                 position: relative;
                 overflow: hidden;
-            }
-            .chat-container::before {
+            }}
+            .chat-container::before {{
                 content: "";
                 position: absolute;
                 inset: 0;
                 background: radial-gradient(140% 140% at 0% 0%, rgba(31,159,236,0.2) 0%, rgba(110,231,183,0.12) 50%, rgba(122,92,255,0.12) 100%);
                 pointer-events: none;
-            }
-            .chat-header {
+            }}
+            .chat-header {{
                 margin: 0 0 8px 0;
                 color: #e9eef4;
                 font-weight: 900;
                 font-size: 1.8rem;
                 letter-spacing: 0.2px;
-            }
-            .chat-sub {
+            }}
+            .chat-sub {{
                 margin: 0 0 8px 0;
                 color: #c5ced8;
                 font-weight: 500;
-            }
+            }}
             .chat-feed { margin: 8px 0 12px 0; }
-            .bubble-user {
+            .bubble-user {{
                 background: linear-gradient(135deg, #93C5FD 0%, #6EE7B7 100%);
                 color: #0b1020;
                 padding: 12px 14px;
@@ -110,8 +112,8 @@ class BaseBot:
                 max-width: 92%;
                 font-weight: 600;
                 box-shadow: 0 4px 12px rgba(31,159,236,0.25);
-            }
-            .bubble-assistant {
+            }}
+            .bubble-assistant {{
                 background: rgba(255,255,255,0.06);
                 color: #e9eef4;
                 padding: 12px 14px;
@@ -120,24 +122,24 @@ class BaseBot:
                 display: inline-block;
                 max-width: 92%;
                 border: 1px solid rgba(255,255,255,0.08);
-            }
-            .bubble-assistant pre, .bubble-assistant code { background: rgba(0,0,0,0.35); color: #e9eef4; }
-            .bubble-assistant pre { padding: 10px; border-radius: 10px; overflow-x: auto; }
-            .bubble-assistant code { padding: 2px 6px; border-radius: 6px; }
-            .chat-row { display: flex; gap: 8px; align-items: flex-end; margin: 8px 0; }
-            .chat-row.user { justify-content: flex-end; }
-            .chat-row.assistant { justify-content: flex-start; }
-            .chat-row .time { font-size: 0.75rem; color: #aeb6bf; margin: 2px 6px; }
-            .avatar { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); }
-            .avatar span { font-size: 18px; }
-            .message { max-width: 85%; }
-            .typing { display: inline-block; min-width: 36px; }
-            .typing .dot { height: 6px; width: 6px; margin: 0 2px; background: #c5ced8; border-radius: 50%; display: inline-block; animation: blink 1.2s infinite; }
-            .typing .dot:nth-child(2) { animation-delay: .2s; }
-            .typing .dot:nth-child(3) { animation-delay: .4s; }
-            @keyframes blink { 0%, 80%, 100% { opacity: 0.2; } 40% { opacity: 1; } }
-            [data-testid="stChatInput"] textarea { font-weight: 600; }
-            .stButton > button {
+            }}
+            .bubble-assistant pre, .bubble-assistant code {{ background: rgba(0,0,0,0.35); color: #e9eef4; }}
+            .bubble-assistant pre {{ padding: 10px; border-radius: 10px; overflow-x: auto; }}
+            .bubble-assistant code {{ padding: 2px 6px; border-radius: 6px; }}
+            .chat-row {{ display: flex; gap: 8px; align-items: flex-end; margin: 8px 0; }}
+            .chat-row.user {{ justify-content: flex-end; }}
+            .chat-row.assistant {{ justify-content: flex-start; }}
+            .chat-row .time {{ font-size: 0.75rem; color: #aeb6bf; margin: 2px 6px; }}
+            .avatar {{ width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); }}
+            .avatar span {{ font-size: 18px; }}
+            .message {{ max-width: 85%; }}
+            .typing {{ display: inline-block; min-width: 36px; }}
+            .typing .dot {{ height: 6px; width: 6px; margin: 0 2px; background: #c5ced8; border-radius: 50%; display: inline-block; animation: blink 1.2s infinite; }}
+            .typing .dot:nth-child(2) {{ animation-delay: .2s; }}
+            .typing .dot:nth-child(3) {{ animation-delay: .4s; }}
+            @keyframes blink {{ 0%, 80%, 100% {{ opacity: 0.2; }} 40% {{ opacity: 1; }} }}
+            [data-testid="stChatInput"] textarea {{ font-weight: 600; }}
+            .stButton > button {{
                 display: inline-block;
                 padding: 10px 22px;
                 font-size: 1.05rem;
@@ -149,11 +151,11 @@ class BaseBot:
                 cursor: pointer;
                 box-shadow: 0 4px 12px rgba(31,159,236,0.25);
                 transition: background 0.25s ease, transform 0.15s ease;
-            }
-            .stButton > button:hover {
+            }}
+            .stButton > button:hover {{
                 background: linear-gradient(135deg, #93C5FD 0%, #6EE7B7 80%) !important;
                 transform: translateY(-1px) scale(1.01);
-            }
+            }}
             </style>
             <div class="chat-container">
                 <h1 class="chat-header">{self.name}</h1>
