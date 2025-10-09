@@ -37,7 +37,7 @@ class DocumentationBot(BaseBot):
             "<div class='chat-row assistant'><div class='avatar'><span>__EMOJI__</span></div><div class='message'>"
             "<div class='bubble-assistant'><div class='docmsg'>__CONTENT__</div>"
             "<div class='bubble-actions'>"
-            "<button class='copy-btn' onclick=\"(function(btn){const msg=btn.closest('.bubble-assistant').querySelector('.docmsg');if(!msg) return;const txt=msg.innerText;try{navigator.clipboard.writeText(txt);}catch(e){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);}const ok=btn.parentElement.querySelector('.copy-badge'); if(ok){ok.style.display='inline'; setTimeout(()=>ok.style.display='none',1200);} })(this)\">Copy</button>"
+            "<button class='copy-btn' onclick=\"(function(btn){const msg=btn.closest('.bubble-assistant').querySelector('.docmsg');if(!msg) return;const txt=msg.innerText;const showOk=()=>{const ok=btn.parentElement.querySelector('.copy-badge'); if(ok){ok.style.display='inline'; setTimeout(()=>ok.style.display='none',1200);}};const fallback=()=>{const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(ta);showOk();};if(navigator.clipboard && window.isSecureContext){navigator.clipboard.writeText(txt).then(showOk).catch(fallback);} else {fallback();}})(this)\">Copy</button>"
             "<span class='copy-badge'>Copied</span>"
             "</div></div>"
             "<span class='time'>__TIMESTAMP__</span></div></div>"
