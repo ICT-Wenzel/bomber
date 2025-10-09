@@ -31,18 +31,19 @@ class DocumentationBot(BaseBot):
     def render_message_html(self, content: str, is_user: bool, timestamp: str) -> str:
         if is_user:
             return super().render_message_html(content, is_user, timestamp)
-        # Assistant message with copy button
+        # Assistant message with copy button (avoid f-string to keep JS braces intact)
         safe_id = abs(hash(content)) % (10**9)
+        template = (
+            "<div class='chat-row assistant'><div class='avatar'><span>__EMOJI__</span></div><div class='message'>"
+            "<div class='bubble-assistant'><button class='copy-btn' onclick=\"(async()=>{const el=document.getElementById('docmsg-__SAFE_ID__');if(!el) return;const txt=el.innerText;try{await navigator.clipboard.writeText(txt);}catch(e){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);}const ok=el.parentElement.querySelector('.copy-badge'); if(ok){ok.style.display='inline'; setTimeout(()=>ok.style.display='none',1200);} })()\">Copy</button><span id='docmsg-__SAFE_ID__'>__CONTENT__</span><span class='copy-badge'>Copied</span></div>"
+            "<span class='time'>__TIMESTAMP__</span></div></div>"
+        )
         return (
-            f"<div class='chat-row assistant'><div class='avatar'><span>{self.emoji}</span></div><div class='message'>"
-            f"<div class='bubble-assistant'><button class='copy-btn' onclick=\"(async()=>{"
-            f"const el=document.getElementById('docmsg-{safe_id}');"
-            f"if(!el) return;"
-            f"const txt=el.innerText;"
-            f"try{{await navigator.clipboard.writeText(txt);}}catch(e){{const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);}}"
-            f"const ok=el.parentElement.querySelector('.copy-badge'); if(ok){{ok.style.display='inline'; setTimeout(()=>ok.style.display='none',1200);}}"
-            f"})()\">Copy</button><span id='docmsg-{safe_id}'>{content}</span><span class='copy-badge'>Copied</span></div>"
-            f"<span class='time'>{timestamp}</span></div></div>"
+            template
+            .replace("__EMOJI__", str(self.emoji))
+            .replace("__SAFE_ID__", str(safe_id))
+            .replace("__CONTENT__", content)
+            .replace("__TIMESTAMP__", timestamp)
         )
 
 
