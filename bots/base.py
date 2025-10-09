@@ -58,6 +58,50 @@ class BaseBot:
             "webhook": self.resolve_webhook(),
         }
 
+    # ---------- UI Hook surface (override in subclasses for custom UI) ----------
+    def ui_styles(self) -> str:
+        """Additional CSS injected for this bot's UI."""
+        return ""
+
+    def ui_header_html(self) -> str:
+        """Header HTML for this bot (name/description by default)."""
+        return (
+            f"""
+            <div class=\"chat-container\"> 
+                <h1 class=\"chat-header\">{self.name}</h1>
+                <p class=\"chat-sub\">{self.description}</p>
+            </div>
+            """
+        )
+
+    def initial_assistant_message(self) -> str:
+        """Initial greeting used to seed the conversation."""
+        return f"Hello! I'm {self.name}. {self.description} How can I help you today?"
+
+    def format_user_prompt(self, prompt: str) -> str:
+        """Transform the user prompt before sending it to the backend."""
+        return prompt
+
+    def webhook_payload(self, formatted_prompt: str) -> dict:
+        """Build the payload sent to the webhook."""
+        return {
+            "frage": f"{formatted_prompt} \n Es wird eine Nachricht f\u00fcr folgenden Bot verlangt: {self.name}",
+        }
+
+    def render_message_html(self, content: str, is_user: bool, timestamp: str) -> str:
+        """Render a single message bubble as HTML."""
+        bubble_class = "bubble-user" if is_user else "bubble-assistant"
+        avatar = "🧑" if is_user else self.emoji
+        if is_user:
+            return (
+                f"<div class='chat-row user'><div class='message'><div class='{bubble_class}'>{content}</div>"
+                f"<span class='time'>{timestamp}</span></div><div class='avatar'><span>{avatar}</span></div></div>"
+            )
+        return (
+            f"<div class='chat-row assistant'><div class='avatar'><span>{avatar}</span></div><div class='message'>"
+            f"<div class='{bubble_class}'>{content}</div><span class='time'>{timestamp}</span></div></div>"
+        )
+
     # ---------- Default UI rendering (can be overridden per bot) ----------
     def render_chat(self) -> None:
         try:
@@ -160,16 +204,12 @@ class BaseBot:
             </style>
         """, unsafe_allow_html=True)
 
-        # Header HTML with variables
-        st.markdown(
-            f"""
-            <div class=\"chat-container\"> 
-                <h1 class=\"chat-header\">{self.name}</h1>
-                <p class=\"chat-sub\">{self.description}</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        # Bot-specific additional styles and header
+        extra_css = self.ui_styles()
+        if extra_css:
+            st.markdown(f"<style>{extra_css}</style>", unsafe_allow_html=True)
+
+        st.markdown(self.ui_header_html(), unsafe_allow_html=True)
 
         if st.button("⬅️ Zurück zum Dashboard", key=f"back_dashboard_{bot_key}"):
             st.session_state.view = "dashboard"
@@ -181,7 +221,7 @@ class BaseBot:
             st.session_state.messages[bot_key] = [
                 {
                     "id": "1",
-                    "content": f"Hello! I'm {self.name}. {self.description} How can I help you today?",
+                    "content": self.initial_assistant_message(),
                     "isUser": False,
                     "timestamp": datetime.now().strftime("%H:%M:%S"),
                 }
@@ -189,19 +229,12 @@ class BaseBot:
 
         st.markdown("<div class='chat-feed'>", unsafe_allow_html=True)
         for msg in st.session_state.messages[bot_key]:
-            role = "user" if msg["isUser"] else "assistant"
-            bubble_class = "bubble-user" if msg["isUser"] else "bubble-assistant"
-            avatar = "🧑" if msg["isUser"] else self.emoji
-            if msg["isUser"]:
-                st.markdown(
-                    f"<div class='chat-row user'><div class='message'><div class='{bubble_class}'>{msg['content']}</div><span class='time'>{msg['timestamp']}</span></div><div class='avatar'><span>{avatar}</span></div></div>",
-                    unsafe_allow_html=True,
-                )
-            else:
-                st.markdown(
-                    f"<div class='chat-row assistant'><div class='avatar'><span>{avatar}</span></div><div class='message'><div class='{bubble_class}'>{msg['content']}</div><span class='time'>{msg['timestamp']}</span></div></div>",
-                    unsafe_allow_html=True,
-                )
+            st.markdown(
+                self.render_message_html(
+                    content=msg["content"], is_user=msg["isUser"], timestamp=msg["timestamp"]
+                ),
+                unsafe_allow_html=True,
+            )
         st.markdown("</div>", unsafe_allow_html=True)
 
         if prompt := st.chat_input("Schreibe eine Nachricht..."):
@@ -213,7 +246,9 @@ class BaseBot:
             }
             st.session_state.messages[bot_key].append(user_message)
             st.markdown(
-                f"<div class='chat-row user'><div class='message'><div class='bubble-user'>{prompt}</div><span class='time'>{user_message['timestamp']}</span></div><div class='avatar'><span>🧑</span></div></div>",
+                self.render_message_html(
+                    content=prompt, is_user=True, timestamp=user_message["timestamp"]
+                ),
                 unsafe_allow_html=True,
             )
 
@@ -230,9 +265,11 @@ class BaseBot:
                 )
             else:
                 try:
+                    formatted_prompt = self.format_user_prompt(prompt)
+                    payload = self.webhook_payload(formatted_prompt)
                     response = requests.post(
                         webhook_url,
-                        json={"frage": f"{prompt} \n Es wird eine Nachricht für folgenden Bot verlangt: {self.name}"},
+                        json=payload,
                         timeout=180,
                     )
                     response.raise_for_status()
@@ -249,7 +286,9 @@ class BaseBot:
             st.session_state.messages[bot_key].append(bot_message)
             typing_placeholder.empty()
             st.markdown(
-                f"<div class='chat-row assistant'><div class='avatar'><span>{self.emoji}</span></div><div class='message'><div class='bubble-assistant'>{bot_content}</div><span class='time'>{bot_message['timestamp']}</span></div></div>",
+                self.render_message_html(
+                    content=bot_content, is_user=False, timestamp=bot_message["timestamp"]
+                ),
                 unsafe_allow_html=True,
             )
 

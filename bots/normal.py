@@ -11,8 +11,16 @@ class NormalBot(BaseBot):
     emoji = "🌍"
     color = "#4A4A4A"
 
-    # Example: override UI or behavior here if needed
-    # def render_chat(self) -> None:
-    #     super().render_chat()
+    # Per-bot UI customizations
+    def ui_styles(self) -> str:
+        return ".bubble-assistant { border-color: rgba(147,197,253,0.35); }"
+
+    def initial_assistant_message(self) -> str:
+        return (
+            "Hi! I'm your general assistant. Ask me anything—writing, code, ideas."
+        )
+
+    def format_user_prompt(self, prompt: str) -> str:
+        return prompt
 
 

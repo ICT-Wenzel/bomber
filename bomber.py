@@ -3,6 +3,7 @@ import requests
 from datetime import datetime
 from bots.registry import discover_bots
 
+
 # Discover bots dynamically from the bots package
 BOTS = discover_bots()
 
