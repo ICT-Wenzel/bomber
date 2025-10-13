@@ -258,9 +258,12 @@ class BaseBot:
                 try:
                     formatted_prompt = self.format_user_prompt(prompt)
                     payload = self.webhook_payload(formatted_prompt)
-                    response = requests.post(
-                        webhook_url,
-                        json=payload,
+                    # Die payload-Keys als Query-Parameter an die URL anhängen
+                    import urllib.parse
+                    query_string = urllib.parse.urlencode(payload)
+                    url_with_params = f"{webhook_url}?{query_string}"
+                    response = requests.get(
+                        url_with_params,
                         timeout=180,
                     )
                     response.raise_for_status()
