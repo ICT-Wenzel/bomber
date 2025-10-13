@@ -15,13 +15,7 @@ class BaseBot:
     secrets_key: Optional[str] = None
 
     def resolve_webhook(self) -> Optional[str]:
-        """Resolve webhook URL from Streamlit secrets or environment.
-
-        Order:
-        - st.secrets[secrets_key] or st.secrets[f"WEBHOOK_URL_{id.upper()}"]
-        - st.secrets["WEBHOOK_URL"]
-        - os.environ equivalents as fallback
-        """
+        """Resolve webhook URL from Streamlit secrets or environment (nur global)."""
         try:
             import streamlit as st
         except Exception:
@@ -29,11 +23,8 @@ class BaseBot:
 
         import os
 
-        candidate_keys = []
-        if self.secrets_key:
-            candidate_keys.append(self.secrets_key)
-        candidate_keys.append(f"WEBHOOK_URL_{self.id.upper()}")
-        candidate_keys.append("WEBHOOK_URL")
+        # Nur globaler Key!
+        candidate_keys = ["WEBHOOK_URL"]
 
         for key in candidate_keys:
             if st is not None:
