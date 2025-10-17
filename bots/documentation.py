@@ -1,4 +1,7 @@
 from .base import BaseBot
+import streamlit as st
+import requests
+from datetime import datetime
 
 
 class DocumentationBot(BaseBot):
@@ -18,14 +21,6 @@ class DocumentationBot(BaseBot):
             ".chat-header { letter-spacing: 0.4px; } "
             ".bubble-assistant { border-color: rgba(110,231,183,0.35); } "
             ".docmsg { display: block; white-space: pre-wrap; } "
-            ".bubble-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 8px; } "
-            ".copy-btn, .webhook-btn { border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08); color: #e9eef4; border-radius: 8px; padding: 6px 10px; font-size: 12px; cursor: pointer; transition: background 0.2s; } "
-            ".copy-btn:hover, .webhook-btn:hover { background: rgba(255,255,255,0.14); } "
-            ".webhook-btn { background: rgba(110,231,183,0.15); border-color: rgba(110,231,183,0.35); } "
-            ".webhook-btn:hover { background: rgba(110,231,183,0.25); } "
-            ".webhook-btn:disabled { opacity: 0.5; cursor: not-allowed; } "
-            ".copy-badge, .webhook-badge { font-size: 12px; color: #9fe6b7; display: none; margin-left: 4px; } "
-            ".webhook-error { font-size: 12px; color: #ff6b6b; display: none; margin-left: 4px; } "
         )
 
     def initial_assistant_message(self) -> str:
@@ -40,28 +35,63 @@ class DocumentationBot(BaseBot):
         if is_user:
             return super().render_message_html(content, is_user, timestamp)
         
-        # Kompakte Copy-Funktion (alles in einer Zeile)
-        copy_js = "(function(btn){const msg=btn.closest('.bubble-assistant').querySelector('.docmsg');if(!msg)return;const txt=msg.innerText;const showOk=()=>{const ok=btn.parentElement.querySelector('.copy-badge');if(ok){ok.style.display='inline';setTimeout(()=>ok.style.display='none',1200);}};const fallback=()=>{const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(ta);showOk();};if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(txt).then(showOk).catch(fallback);}else{fallback();}})(this)"
-        
-        # Kompakte Webhook-Funktion (alles in einer Zeile)
-        webhook_js = f"(async function(btn){{const msg=btn.closest('.bubble-assistant').querySelector('.docmsg');if(!msg)return;const txt=msg.innerText;const badge=btn.parentElement.querySelector('.webhook-badge');const error=btn.parentElement.querySelector('.webhook-error');btn.disabled=true;btn.textContent='Sending...';try{{const res=await fetch('{self.webhook_url}',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{content:txt,timestamp:'{timestamp}',type:'documentation'}})}});if(res.ok){{if(badge){{badge.style.display='inline';setTimeout(()=>badge.style.display='none',2000);}}btn.textContent='Add to Documentation';}}else{{throw new Error('Request failed');}}}}catch(e){{if(error){{error.style.display='inline';setTimeout(()=>error.style.display='none',3000);}}btn.textContent='Add to Documentation';}}finally{{btn.disabled=false;}}}})(this)"
-        
-        # HTML Template (kompakt)
+        # Standard HTML für Assistant Message
         html = (
             f"<div class='chat-row assistant'>"
             f"<div class='avatar'><span>{self.emoji}</span></div>"
             f"<div class='message'>"
             f"<div class='bubble-assistant'>"
             f"<div class='docmsg'>{content}</div>"
-            f"<div class='bubble-actions'>"
-            f"<button class='webhook-btn' onclick=\"{webhook_js}\">Add to Documentation</button>"
-            f"<button class='copy-btn' onclick=\"{copy_js}\">Copy</button>"
-            f"<span class='webhook-badge'>✓ Added</span>"
-            f"<span class='webhook-error'>✗ Failed</span>"
-            f"<span class='copy-badge'>Copied</span>"
-            f"</div></div>"
+            f"</div>"
             f"<span class='time'>{timestamp}</span>"
             f"</div></div>"
         )
-        
         return html
+    
+    def render_message_with_actions(self, content: str, timestamp: str, message_id: int):
+        """
+        Rendert eine Nachricht mit Streamlit-Buttons
+        """
+        # Message HTML
+        html = self.render_message_html(content, is_user=False, timestamp=timestamp)
+        st.markdown(html, unsafe_allow_html=True)
+        
+        # Streamlit Buttons in Columns
+        col1, col2, col3 = st.columns([2, 1, 1])
+        
+        with col2:
+            if st.button("📋 Copy", key=f"copy_{message_id}", use_container_width=True):
+                st.code(content, language=None)
+                st.success("✓ Kopiere den Text aus dem Code-Block oben!", icon="✓")
+        
+        with col3:
+            if st.button("📄 Add to Docs", key=f"webhook_{message_id}", use_container_width=True):
+                success = self.send_to_webhook(content, timestamp)
+                if success:
+                    st.success("✓ Added to documentation!", icon="✓")
+                else:
+                    st.error("✗ Failed to send", icon="✗")
+    
+    def send_to_webhook(self, content: str, timestamp: str) -> bool:
+        """
+        Sendet den Content per POST an die Webhook URL
+        """
+        try:
+            payload = {
+                "content": content,
+                "timestamp": timestamp,
+                "type": "documentation",
+                "created_at": datetime.now().isoformat()
+            }
+            
+            response = requests.post(
+                self.webhook_url,
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=10
+            )
+            
+            return response.status_code == 200
+        except Exception as e:
+            print(f"Webhook error: {e}")
+            return False
