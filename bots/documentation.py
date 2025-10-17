@@ -21,6 +21,7 @@ class DocumentationBot(BaseBot):
             ".chat-header { letter-spacing: 0.4px; } "
             ".bubble-assistant { border-color: rgba(110,231,183,0.35); } "
             ".docmsg { display: block; white-space: pre-wrap; } "
+            ".message-actions { margin-top: 8px; margin-left: 48px; } "
         )
 
     def initial_assistant_message(self) -> str:
@@ -48,29 +49,36 @@ class DocumentationBot(BaseBot):
         )
         return html
     
-    def render_message_with_actions(self, content: str, timestamp: str, message_id: int):
+    def render_assistant_message(self, content: str, timestamp: str, message_id: int):
         """
-        Rendert eine Nachricht mit Streamlit-Buttons
+        Rendert eine Assistant-Nachricht MIT Buttons darunter
+        Verwende diese Methode für alle Assistant-Messages!
         """
-        # Message HTML
+        # 1. Message HTML rendern
         html = self.render_message_html(content, is_user=False, timestamp=timestamp)
         st.markdown(html, unsafe_allow_html=True)
         
-        # Streamlit Buttons in Columns
-        col1, col2, col3 = st.columns([2, 1, 1])
+        # 2. Buttons direkt darunter (mit Custom Styling)
+        st.markdown('<div class="message-actions">', unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([6, 1, 1.5])
         
         with col2:
             if st.button("📋 Copy", key=f"copy_{message_id}", use_container_width=True):
-                st.code(content, language=None)
-                st.success("✓ Kopiere den Text aus dem Code-Block oben!", icon="✓")
+                # Zeige Content zum Kopieren
+                with st.expander("📋 Content zum Kopieren", expanded=True):
+                    st.code(content, language=None)
+                st.toast("✓ Kopiere den Text aus dem Code-Block!", icon="✓")
         
         with col3:
             if st.button("📄 Add to Docs", key=f"webhook_{message_id}", use_container_width=True):
-                success = self.send_to_webhook(content, timestamp)
+                with st.spinner("Sending..."):
+                    success = self.send_to_webhook(content, timestamp)
                 if success:
-                    st.success("✓ Added to documentation!", icon="✓")
+                    st.toast("✓ Added to documentation!", icon="✓")
                 else:
-                    st.error("✗ Failed to send", icon="✗")
+                    st.toast("✗ Failed to send to webhook", icon="✗")
+        
+        st.markdown('</div>', unsafe_allow_html=True)
     
     def send_to_webhook(self, content: str, timestamp: str) -> bool:
         """
@@ -93,5 +101,5 @@ class DocumentationBot(BaseBot):
             
             return response.status_code == 200
         except Exception as e:
-            print(f"Webhook error: {e}")
+            st.error(f"Webhook error: {e}")
             return False
