@@ -21,10 +21,6 @@ class DocumentationBot(BaseBot):
             ".chat-header { letter-spacing: 0.4px; } "
             ".bubble-assistant { border-color: rgba(110,231,183,0.35); } "
             ".docmsg { display: block; white-space: pre-wrap; } "
-            ".message-actions { margin-top: 12px; display: flex; gap: 8px; justify-content: flex-start; } "
-            ".action-btn { padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; "
-            "background: white; cursor: pointer; font-size: 13px; } "
-            ".action-btn:hover { background: #f0f0f0; } "
         )
 
     def initial_assistant_message(self) -> str:
@@ -35,15 +31,12 @@ class DocumentationBot(BaseBot):
     def format_user_prompt(self, prompt: str) -> str:
         return f"[DOCS_REQUEST] {prompt}"
 
-    def render_message_html(self, content: str, is_user: bool, timestamp: str, message_id: int = None) -> str:
-        """
-        WICHTIG: Diese Methode wird von der Base-Klasse aufgerufen.
-        Wir müssen hier die Buttons direkt einbauen!
-        """
+    def render_message_html(self, content: str, is_user: bool, timestamp: str) -> str:
+        """Standard Message Rendering ohne Buttons"""
         if is_user:
             return super().render_message_html(content, is_user, timestamp)
         
-        # Assistant Message MIT Buttons im HTML
+        # Einfache Assistant Message
         html = (
             f"<div class='chat-row assistant'>"
             f"<div class='avatar'><span>{self.emoji}</span></div>"
@@ -52,48 +45,65 @@ class DocumentationBot(BaseBot):
             f"<div class='docmsg'>{content}</div>"
             f"</div>"
             f"<span class='time'>{timestamp}</span>"
+            f"</div></div>"
         )
-        
-        # Buttons NUR rendern wenn message_id vorhanden
-        if message_id is not None:
-            html += f"<div class='message-actions' id='actions_{message_id}'></div>"
-        
-        html += "</div></div>"
-        
         return html
     
-    def render_assistant_message_with_actions(self, content: str, timestamp: str, message_id: int):
+    def render_message_with_actions(self, content: str, is_user: bool, timestamp: str, message_id: int):
         """
-        Rendert die Message UND die Buttons separat.
-        Diese Methode muss von deinem Chat-Loop aufgerufen werden!
+        Rendert Message MIT Action Buttons.
+        Rufe diese Methode statt render_message_html auf!
         """
-        # 1. HTML Message rendern
-        html = self.render_message_html(content, is_user=False, timestamp=timestamp, message_id=message_id)
-        st.markdown(html, unsafe_allow_html=True)
+        # 1. Message HTML rendern
+        message_html = self.render_message_html(content, is_user, timestamp)
+        st.markdown(message_html, unsafe_allow_html=True)
         
-        # 2. Buttons in Container (außerhalb des HTML)
-        col1, col2, col3 = st.columns([7, 1.5, 1.5])
-        
-        with col2:
-            if st.button("📋 Copy", key=f"copy_{message_id}", use_container_width=True):
-                st.session_state[f"show_copy_{message_id}"] = True
-        
-        with col3:
-            if st.button("📄 Add to Docs", key=f"webhook_{message_id}", use_container_width=True):
-                with st.spinner("Sending..."):
+        # 2. Nur für Assistant Messages: Buttons rendern
+        if not is_user:
+            # Kleine Lücke für bessere Optik
+            st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
+            
+            # Buttons in Columns
+            col1, col2, col3, col4 = st.columns([6, 1.2, 1.5, 1])
+            
+            with col2:
+                copy_btn = st.button(
+                    "📋 Copy", 
+                    key=f"copy_btn_{message_id}",
+                    use_container_width=True,
+                    type="secondary"
+                )
+                
+            with col3:
+                docs_btn = st.button(
+                    "📄 Add to Docs", 
+                    key=f"docs_btn_{message_id}",
+                    use_container_width=True,
+                    type="primary"
+                )
+            
+            # Button Actions
+            if copy_btn:
+                # Zeige den Content zum manuellen Kopieren
+                st.text_area(
+                    "Content to copy:",
+                    value=content,
+                    height=200,
+                    key=f"copy_area_{message_id}"
+                )
+                st.info("👆 Select the text above and copy it (Ctrl+C / Cmd+C)")
+                
+            if docs_btn:
+                with st.spinner("Sending to webhook..."):
                     success = self.send_to_webhook(content, timestamp)
+                
                 if success:
-                    st.success("✓ Added to documentation!")
+                    st.success("✅ Successfully added to documentation!", icon="✅")
                 else:
-                    st.error("✗ Failed to send")
-        
-        # Copy Expander anzeigen wenn aktiviert
-        if st.session_state.get(f"show_copy_{message_id}", False):
-            with st.expander("📋 Content zum Kopieren", expanded=True):
-                st.code(content, language=None)
-                if st.button("✕ Close", key=f"close_copy_{message_id}"):
-                    st.session_state[f"show_copy_{message_id}"] = False
-                    st.rerun()
+                    st.error("❌ Failed to send to webhook. Check the URL and try again.", icon="❌")
+            
+            # Trennlinie nach den Buttons
+            st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
     
     def send_to_webhook(self, content: str, timestamp: str) -> bool:
         """
@@ -115,6 +125,13 @@ class DocumentationBot(BaseBot):
             )
             
             return response.status_code == 200
+            
+        except requests.exceptions.Timeout:
+            st.error("⏱️ Request timed out after 10 seconds")
+            return False
+        except requests.exceptions.ConnectionError:
+            st.error("🔌 Could not connect to webhook URL")
+            return False
         except Exception as e:
-            st.error(f"Webhook error: {e}")
+            st.error(f"⚠️ Webhook error: {str(e)}")
             return False
