@@ -165,6 +165,41 @@ if st.session_state.view == "dashboard":
 elif st.session_state.view == "chat":
     bot_key = st.session_state.active_bot
     bot_instance = BOTS[bot_key]
-    bot_instance.render_chat()
+
+    # Initialisiere Nachrichten für den Bot
+    if bot_key not in st.session_state.messages:
+        st.session_state.messages[bot_key] = []
+
+    st.markdown(f"<h2 style='margin-bottom:0'>{bot_instance.to_config()['emoji']} {bot_instance.to_config()['name']}</h2>", unsafe_allow_html=True)
+    st.markdown(f"<p style='color:#aeb6bf;'>{bot_instance.to_config()['description']}</p>", unsafe_allow_html=True)
+
+    # Chatverlauf anzeigen
+    for idx, msg in enumerate(st.session_state.messages[bot_key]):
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+            # Beispielhafte Antwort-Buttons unter Bot-Antworten
+            if msg["role"] == "assistant":
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    if st.button("👍", key=f"like_{idx}"):
+                        st.session_state.messages[bot_key].append({"role": "user", "content": "👍"})
+                        st.rerun()
+                with col2:
+                    if st.button("👎", key=f"dislike_{idx}"):
+                        st.session_state.messages[bot_key].append({"role": "user", "content": "👎"})
+                        st.rerun()
+                with col3:
+                    if st.button("Mehr Info", key=f"info_{idx}"):
+                        st.session_state.messages[bot_key].append({"role": "user", "content": "Mehr Info"})
+                        st.rerun()
+
+    # Eingabefeld für neue Nachrichten
+    user_input = st.chat_input("Nachricht eingeben...")
+    if user_input:
+        st.session_state.messages[bot_key].append({"role": "user", "content": user_input})
+        # Bot-Antwort generieren (hier Dummy, ersetzen mit bot_instance)
+        response = bot_instance.reply(user_input) if hasattr(bot_instance, "reply") else "Bot-Antwort: " + user_input
+        st.session_state.messages[bot_key].append({"role": "assistant", "content": response})
+        st.rerun()
 
 
