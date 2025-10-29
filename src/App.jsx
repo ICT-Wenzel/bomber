@@ -138,12 +138,34 @@ const AICockpit = () => {
         throw new Error(`API Error: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json();
+      // Prüfe Content-Type um Text oder JSON zu parsen
+      const contentType = response.headers.get('content-type');
+      let botContent;
+      let metadata = null;
+
+      if (contentType && contentType.includes('application/json')) {
+        // JSON Response von n8n
+        const data = await response.json();
+        
+        // n8n sendet oft ein Array: [{ "output": "..." }]
+        if (Array.isArray(data) && data.length > 0) {
+          const firstItem = data[0];
+          botContent = firstItem.output || firstItem.response || firstItem.message || firstItem.text || JSON.stringify(firstItem);
+          metadata = firstItem.metadata;
+        } else {
+          // Normales Objekt: { "response": "..." }
+          botContent = data.response || data.message || data.output || data.text || JSON.stringify(data);
+          metadata = data.metadata;
+        }
+      } else {
+        // Plain Text Response von n8n
+        botContent = await response.text();
+      }
       
       const botMessage = {
         role: 'assistant',
-        content: data.response || data.message || data.output || 'Keine Antwort erhalten',
-        metadata: data.metadata,
+        content: botContent,
+        metadata: metadata,
         timestamp: new Date().toISOString()
       };
 
@@ -423,13 +445,30 @@ const AICockpit = () => {
               </div>
               
               <div className={`p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
-                <p className="text-xs font-medium mb-1">Payload Format:</p>
+                <p className="text-xs font-medium mb-2">📤 Request Format:</p>
                 <pre className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} overflow-x-auto`}>
 {`{
   "botType": "documentation",
   "message": "User message",
   "timestamp": "ISO date"
 }`}
+                </pre>
+                
+                <p className="text-xs font-medium mb-2 mt-3">📥 Response Format:</p>
+                <pre className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} overflow-x-auto`}>
+{`n8n Array (Standard):
+[{
+  "output": "Bot Antwort",
+  "metadata": {...}
+}]
+
+Oder JSON Objekt:
+{
+  "response": "Bot Antwort"
+}
+
+Oder Plain Text:
+"Bot Antwort"`}
                 </pre>
               </div>
 
