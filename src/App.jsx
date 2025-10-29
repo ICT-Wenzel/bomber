@@ -112,14 +112,10 @@ const AICockpit = () => {
     try {
       const bot = AI_COCKPIT_CONFIG.bots[activeBot];
       
-      // Payload für n8n Webhook
+      // Payload für n8n Webhook - NUR die aktuelle Nachricht
       const payload = {
         botType: bot.botType,
         message: messageToSend,
-        context: currentMessages.slice(-5).map(m => ({
-          role: m.role,
-          content: m.content
-        })),
         timestamp: new Date().toISOString()
       };
 
@@ -432,7 +428,6 @@ const AICockpit = () => {
 {`{
   "botType": "documentation",
   "message": "User message",
-  "context": [...],
   "timestamp": "ISO date"
 }`}
                 </pre>
