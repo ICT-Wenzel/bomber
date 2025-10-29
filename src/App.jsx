@@ -3,9 +3,14 @@ import { MessageSquare, FileText, Book, Send, Trash2, Download, Moon, Sun, Setti
 
 // ENV Configuration - Hardcoded n8n Webhook
 const ENV_CONFIG = {
-  N8N_WEBHOOK_URL: 'https://n8n.srv1018504.hstgr.cloud/webhook/8b48d494-eb25-4d3e-90d7-46c4e7a6f440',
-  N8N_API_KEY: 'your-api-key-here' // Optional: kann auch leer bleiben
+  N8N_WEBHOOK_URL: import.meta.env.VITE_N8N_WEBHOOK_URL,
+  N8N_API_KEY: ''
 };
+
+// Runtime Check
+if (!ENV_CONFIG.N8N_WEBHOOK_URL) {
+  console.error('❌ N8N Webhook URL nicht konfiguriert!');
+}
 
 const AI_COCKPIT_CONFIG = {
   bots: {
