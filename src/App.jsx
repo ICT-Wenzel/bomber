@@ -41,6 +41,214 @@ const AI_COCKPIT_CONFIG = {
   }
 };
 
+// Markdown Parser Component
+const MarkdownRenderer = ({ content, darkMode }) => {
+  const parseMarkdown = (text) => {
+    const elements = [];
+    const lines = text.split('\n');
+    let i = 0;
+    let codeBlock = null;
+    let codeLanguage = '';
+    let listItems = [];
+    let listType = null;
+
+    const flushList = () => {
+      if (listItems.length > 0) {
+        elements.push(
+          listType === 'ul' ? (
+            <ul key={elements.length} className="list-disc list-inside my-2 space-y-1">
+              {listItems.map((item, idx) => (
+                <li key={idx}>{parseInline(item)}</li>
+              ))}
+            </ul>
+          ) : (
+            <ol key={elements.length} className="list-decimal list-inside my-2 space-y-1">
+              {listItems.map((item, idx) => (
+                <li key={idx}>{parseInline(item)}</li>
+              ))}
+            </ol>
+          )
+        );
+        listItems = [];
+        listType = null;
+      }
+    };
+
+    const parseInline = (text) => {
+      const parts = [];
+      let remaining = text;
+      let key = 0;
+
+      while (remaining.length > 0) {
+        // Bold **text**
+        if (remaining.match(/^\*\*(.+?)\*\*/)) {
+          const match = remaining.match(/^\*\*(.+?)\*\*/);
+          parts.push(<strong key={key++}>{match[1]}</strong>);
+          remaining = remaining.slice(match[0].length);
+        }
+        // Italic *text*
+        else if (remaining.match(/^\*(.+?)\*/)) {
+          const match = remaining.match(/^\*(.+?)\*/);
+          parts.push(<em key={key++}>{match[1]}</em>);
+          remaining = remaining.slice(match[0].length);
+        }
+        // Inline code `code`
+        else if (remaining.match(/^`(.+?)`/)) {
+          const match = remaining.match(/^`(.+?)`/);
+          parts.push(
+            <code key={key++} className={`px-1.5 py-0.5 rounded text-sm font-mono ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
+              {match[1]}
+            </code>
+          );
+          remaining = remaining.slice(match[0].length);
+        }
+        // Links [text](url)
+        else if (remaining.match(/^\[(.+?)\]\((.+?)\)/)) {
+          const match = remaining.match(/^\[(.+?)\]\((.+?)\)/);
+          parts.push(
+            <a key={key++} href={match[2]} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+              {match[1]}
+            </a>
+          );
+          remaining = remaining.slice(match[0].length);
+        }
+        // Regular text
+        else {
+          const nextSpecial = remaining.search(/[\*`\[]/);
+          const chunk = nextSpecial === -1 ? remaining : remaining.slice(0, nextSpecial);
+          if (chunk) parts.push(<span key={key++}>{chunk}</span>);
+          remaining = remaining.slice(chunk.length);
+        }
+      }
+
+      return parts.length > 0 ? parts : text;
+    };
+
+    while (i < lines.length) {
+      const line = lines[i];
+
+      // Code block start
+      if (line.match(/^```(\w*)/)) {
+        flushList();
+        codeLanguage = line.match(/^```(\w*)/)[1] || '';
+        codeBlock = [];
+        i++;
+        continue;
+      }
+
+      // Code block end
+      if (codeBlock && line.match(/^```$/)) {
+        elements.push(
+          <div key={elements.length} className={`my-3 rounded-lg overflow-hidden ${darkMode ? 'bg-gray-950' : 'bg-gray-100'}`}>
+            {codeLanguage && (
+              <div className={`px-3 py-1 text-xs font-semibold ${darkMode ? 'bg-gray-800 text-gray-400' : 'bg-gray-200 text-gray-600'}`}>
+                {codeLanguage}
+              </div>
+            )}
+            <pre className={`p-3 overflow-x-auto text-sm ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
+              <code className="font-mono">{codeBlock.join('\n')}</code>
+            </pre>
+          </div>
+        );
+        codeBlock = null;
+        codeLanguage = '';
+        i++;
+        continue;
+      }
+
+      // Inside code block
+      if (codeBlock) {
+        codeBlock.push(line);
+        i++;
+        continue;
+      }
+
+      // Headers
+      if (line.match(/^(#{1,6})\s+(.+)/)) {
+        flushList();
+        const match = line.match(/^(#{1,6})\s+(.+)/);
+        const level = match[1].length;
+        const text = match[2];
+        const sizes = ['text-2xl', 'text-xl', 'text-lg', 'text-base', 'text-sm', 'text-sm'];
+        elements.push(
+          <div key={elements.length} className={`${sizes[level - 1]} font-bold my-2`}>
+            {parseInline(text)}
+          </div>
+        );
+        i++;
+        continue;
+      }
+
+      // Unordered list
+      if (line.match(/^[\*\-]\s+(.+)/)) {
+        const match = line.match(/^[\*\-]\s+(.+)/);
+        if (listType !== 'ul') {
+          flushList();
+          listType = 'ul';
+        }
+        listItems.push(match[1]);
+        i++;
+        continue;
+      }
+
+      // Ordered list
+      if (line.match(/^\d+\.\s+(.+)/)) {
+        const match = line.match(/^\d+\.\s+(.+)/);
+        if (listType !== 'ol') {
+          flushList();
+          listType = 'ol';
+        }
+        listItems.push(match[1]);
+        i++;
+        continue;
+      }
+
+      // Horizontal rule
+      if (line.match(/^---+$/)) {
+        flushList();
+        elements.push(<hr key={elements.length} className={`my-3 ${darkMode ? 'border-gray-700' : 'border-gray-300'}`} />);
+        i++;
+        continue;
+      }
+
+      // Blockquote
+      if (line.match(/^>\s+(.+)/)) {
+        flushList();
+        const match = line.match(/^>\s+(.+)/);
+        elements.push(
+          <blockquote key={elements.length} className={`border-l-4 pl-3 my-2 italic ${darkMode ? 'border-gray-600 text-gray-400' : 'border-gray-300 text-gray-600'}`}>
+            {parseInline(match[1])}
+          </blockquote>
+        );
+        i++;
+        continue;
+      }
+
+      // Empty line
+      if (line.trim() === '') {
+        flushList();
+        elements.push(<div key={elements.length} className="h-2" />);
+        i++;
+        continue;
+      }
+
+      // Regular paragraph
+      flushList();
+      elements.push(
+        <p key={elements.length} className="my-1">
+          {parseInline(line)}
+        </p>
+      );
+      i++;
+    }
+
+    flushList();
+    return elements;
+  };
+
+  return <div className="markdown-content">{parseMarkdown(content)}</div>;
+};
+
 const AICockpit = () => {
   const [activeBot, setActiveBot] = useState('documentation');
   const [messages, setMessages] = useState({});
@@ -354,7 +562,11 @@ const AICockpit = () => {
                     }`}
                   >
                     <div className="prose prose-sm max-w-none" style={{ color: 'inherit' }}>
-                      {msg.content}
+                      {msg.role === 'assistant' ? (
+                        <MarkdownRenderer content={msg.content} darkMode={darkMode} />
+                      ) : (
+                        msg.content
+                      )}
                     </div>
                     {msg.metadata && (
                       <div className={`mt-2 text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
