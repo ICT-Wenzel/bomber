@@ -14,9 +14,9 @@ function DocumentationBotMessage({ answer, webhookUrl }) {
   };
 
   return (
-    <div>
-      <div>{answer}</div>
-      <button 
+    <div style={{ marginBottom: '30px', padding: '20px', background: '#222', borderRadius: '12px', color: 'white', position: 'relative' }}>
+      <div style={{ marginBottom: '20px' }}>{answer}</div>
+      <button
         onClick={handleAddToDocumentation}
         style={{
           backgroundColor: 'red',
@@ -26,8 +26,9 @@ function DocumentationBotMessage({ answer, webhookUrl }) {
           border: 'none',
           borderRadius: '10px',
           padding: '10px 30px',
-          marginTop: '20px',
           cursor: 'pointer',
+          display: 'block',
+          margin: '0 auto',
         }}
       >
         ADD

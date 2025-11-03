@@ -12,6 +12,7 @@ function App() {
 
   return (
     <div>
+      <button style={{background:'green',color:'white',fontSize:'1.5rem'}}>Test-Button</button>
       {messages.map((msg, idx) =>
         msg.isBot ? (
           <DocumentationBotMessage key={idx} answer={msg.text} webhookUrl={webhookUrl} />
