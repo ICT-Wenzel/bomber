@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, FileText, Book, Send, Trash2, Download, Moon, Sun, Settings, Loader2 } from 'lucide-react';
+import { MessageSquare, FileText, Book, Send, Trash2, Download, Moon, Sun, Settings, Loader2, Check, AlertCircle } from 'lucide-react';
 
 // ENV Configuration - Hardcoded n8n Webhook
 const ENV_CONFIG = {
@@ -260,6 +260,7 @@ const AICockpit = () => {
     webhookUrl: ENV_CONFIG.N8N_WEBHOOK_URL,
     apiKey: ENV_CONFIG.N8N_API_KEY
   });
+  const [addToDokuStatus, setAddToDokuStatus] = useState({});
   const messagesEndRef = useRef(null);
 
   // Load from localStorage
@@ -395,6 +396,51 @@ const AICockpit = () => {
       }));
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleAddToDoku = async (message, messageId) => {
+    if (!message?.content || addToDokuStatus[messageId] === 'loading') return;
+
+    setAddToDokuStatus(prev => ({ ...prev, [messageId]: 'loading' }));
+
+    try {
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+
+      if (apiConfig.apiKey && apiConfig.apiKey.trim()) {
+        headers['Authorization'] = `Bearer ${apiConfig.apiKey}`;
+      }
+
+      const payload = {
+        botType: 'add-to-doku',
+        content: message.content,
+        timestamp: new Date().toISOString()
+      };
+
+      const response = await fetch(apiConfig.webhookUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Add to Doku Error: ${response.status} ${response.statusText}`);
+      }
+
+      setAddToDokuStatus(prev => ({ ...prev, [messageId]: 'success' }));
+    } catch (error) {
+      console.error('Add to Doku failed:', error);
+      setAddToDokuStatus(prev => ({ ...prev, [messageId]: 'error' }));
+    } finally {
+      setTimeout(() => {
+        setAddToDokuStatus(prev => {
+          const updated = { ...prev };
+          delete updated[messageId];
+          return updated;
+        });
+      }, 3000);
     }
   };
 
@@ -572,6 +618,42 @@ const AICockpit = () => {
                       <div className={`mt-2 text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
                         {msg.metadata.source && `📚 Quelle: ${msg.metadata.source}`}
                         {msg.metadata.confidence && ` • Confidence: ${msg.metadata.confidence}`}
+                      </div>
+                    )}
+                    {activeBot === 'documentation' && msg.role === 'assistant' && !msg.isError && msg.content && (
+                      <div className="mt-3 flex items-center gap-2">
+                        {(() => {
+                          const messageId = msg.timestamp || `${activeBot}-${idx}`;
+                          const status = addToDokuStatus[messageId];
+                          return (
+                            <>
+                              <button
+                                onClick={() => handleAddToDoku(msg, messageId)}
+                                disabled={status === 'loading'}
+                                className={`inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg border transition-colors ${
+                                  darkMode
+                                    ? 'border-gray-600 hover:bg-gray-700 disabled:hover:bg-gray-800'
+                                    : 'border-gray-300 hover:bg-gray-100'
+                                } disabled:opacity-60 disabled:cursor-not-allowed`}
+                              >
+                                {status === 'loading' ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />}
+                                <span>Add to Doku</span>
+                              </button>
+                              {status === 'success' && (
+                                <span className={`inline-flex items-center gap-1 text-sm ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+                                  <Check size={14} />
+                                  Gespeichert
+                                </span>
+                              )}
+                              {status === 'error' && (
+                                <span className={`inline-flex items-center gap-1 text-sm ${darkMode ? 'text-red-400' : 'text-red-600'}`}>
+                                  <AlertCircle size={14} />
+                                  Fehler beim Speichern
+                                </span>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>
