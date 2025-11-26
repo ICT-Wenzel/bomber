@@ -1,5 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, FileText, Book, Send, Trash2, Download, Moon, Sun, Settings, Loader2, Check, AlertCircle } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
+import { useState, useEffect } from 'react';
+
+// Supabase Client initialisieren
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('⚠️ Supabase Credentials nicht gefunden!');
+  console.info('Bitte setze VITE_SUPABASE_URL und VITE_SUPABASE_ANON_KEY in deinen Vercel Environment Variables');
+}
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // ENV Configuration - Hardcoded n8n Webhook
 const ENV_CONFIG = {
@@ -11,6 +22,139 @@ const ENV_CONFIG = {
 if (!ENV_CONFIG.N8N_WEBHOOK_URL) {
   console.error('❌ N8N Webhook URL nicht konfiguriert!');
 }
+
+
+// Auth Component
+const AuthComponent = ({ onAuthSuccess }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [isSignUp, setIsSignUp] = useState(false);
+
+  const handleAuth = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data, error } = isSignUp
+        ? await supabase.auth.signUp({ email, password })
+        : await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) throw error;
+
+      if (data.user) {
+        onAuthSuccess(data.user);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-900">
+      <div className="bg-gray-800 p-8 rounded-2xl shadow-xl w-full max-w-md">
+        <h2 className="text-2xl font-bold text-white mb-6 text-center">
+          {isSignUp ? '🚀 Registrieren' : '🔐 Anmelden'}
+        </h2>
+        
+        <form onSubmit={handleAuth} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              E-Mail
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="deine@email.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Passwort
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="••••••••"
+            />
+          </div>
+
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+              <p className="text-red-400 text-sm">{error}</p>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Lädt...' : (isSignUp ? 'Registrieren' : 'Anmelden')}
+          </button>
+        </form>
+
+        <div className="mt-4 text-center">
+          <button
+            onClick={() => setIsSignUp(!isSignUp)}
+            className="text-blue-400 hover:text-blue-300 text-sm"
+          >
+            {isSignUp ? 'Bereits registriert? Anmelden' : 'Noch kein Account? Registrieren'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Hauptkomponente mit Auth-Check
+const AppWithAuth = () => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Check aktuelle Session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    // Auth State Listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="text-white text-xl">Lädt...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthComponent onAuthSuccess={setUser} />;
+  }
+
 
 const AI_COCKPIT_CONFIG = {
   bots: {
@@ -792,5 +936,5 @@ Oder Plain Text:
     </div>
   );
 };
-
-export default AICockpit;
+};
+export default AppWithAuth;
