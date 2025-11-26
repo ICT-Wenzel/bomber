@@ -299,7 +299,7 @@ const AICockpit = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, activeBot]);
 
-  const sendMessage = async () => {
+ const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
     const userMessage = {
@@ -309,9 +309,12 @@ const AICockpit = () => {
     };
 
     const currentMessages = messages[activeBot] || [];
+    const messagesToSend = [...currentMessages, userMessage];
+    
+    // Sofort User-Message anzeigen
     setMessages(prev => ({
       ...prev,
-      [activeBot]: [...currentMessages, userMessage]
+      [activeBot]: messagesToSend
     }));
     
     const messageToSend = input;
@@ -378,9 +381,10 @@ const AICockpit = () => {
         timestamp: new Date().toISOString()
       };
 
+      // Bot-Message zur bereits gespeicherten Liste hinzufügen
       setMessages(prev => ({
         ...prev,
-        [activeBot]: [...(prev[activeBot] || []), userMessage, botMessage]
+        [activeBot]: [...messagesToSend, botMessage]
       }));
     } catch (error) {
       const errorMessage = {
@@ -390,9 +394,10 @@ const AICockpit = () => {
         timestamp: new Date().toISOString()
       };
       
+      // Error-Message zur bereits gespeicherten Liste hinzufügen
       setMessages(prev => ({
         ...prev,
-        [activeBot]: [...(prev[activeBot] || []), userMessage, errorMessage]
+        [activeBot]: [...messagesToSend, errorMessage]
       }));
     } finally {
       setIsLoading(false);
