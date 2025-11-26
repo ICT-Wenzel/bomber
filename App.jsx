@@ -14,12 +14,12 @@ function App() {
   // Beispiel: Nachricht absenden und Bot-Antwort hinzufügen
   const handleSend = () => {
     if (input.trim() === '') return;
-    // Nur eigene Nachricht hinzufügen
-    setMessages(prev => [...prev, { text: input, isBot: false }]);
+    const userMessage = input;
+    setMessages(prev => [...prev, { text: userMessage, isBot: false }]);
     setInput('');
     // Simuliere Bot-Antwort nach kurzer Zeit
     setTimeout(() => {
-      setMessages(prev => [...prev, { text: 'Bot-Antwort zu: ' + input, isBot: true }]);
+      setMessages(prev => [...prev, { text: 'Bot-Antwort zu: ' + userMessage, isBot: true }]);
     }, 1000);
   };
 
