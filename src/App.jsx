@@ -937,4 +937,7 @@ Oder Plain Text:
   );
 };
 };
-export default AppWithAuth;
+
+// Exportiere die Hauptkomponente als App
+const App = AppWithAuth;
+export default App;
