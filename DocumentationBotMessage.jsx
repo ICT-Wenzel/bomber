@@ -1,6 +1,6 @@
 import React from 'react';
 
-function DocumentationBotMessage({ answer, webhookUrl }) {
+function DocumentationBotMessage({ answer = 'Test-Antwort', webhookUrl }) {
   const handleAddToDocumentation = async () => {
     await fetch(webhookUrl, {
       method: 'POST',
@@ -14,8 +14,8 @@ function DocumentationBotMessage({ answer, webhookUrl }) {
   };
 
   return (
-    <div style={{ marginBottom: '30px', padding: '20px', background: '#222', borderRadius: '12px', color: 'white', position: 'relative' }}>
-      <div style={{ marginBottom: '20px' }}>{answer}</div>
+    <div style={{ border: '2px solid red', padding: '20px', margin: '20px 0', background: '#fff', color: '#000' }}>
+      <div style={{ marginBottom: '20px', fontSize: '1.2rem' }}>{answer}</div>
       <button
         onClick={handleAddToDocumentation}
         style={{
@@ -33,6 +33,7 @@ function DocumentationBotMessage({ answer, webhookUrl }) {
       >
         ADD
       </button>
+      <button style={{background:'blue',color:'white',fontSize:'1.5rem',marginTop:'10px'}}>Test-Button im Antwortfeld</button>
     </div>
   );
 }
