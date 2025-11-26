@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, FileText, Book, Send, Trash2, Download, Moon, Sun, Settings, Loader2, Check, AlertCircle } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
-import { useState, useEffect } from 'react';
 
 // Supabase Client initialisieren
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
