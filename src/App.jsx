@@ -130,7 +130,9 @@ const AppWithAuth = () => {
     });
 
     // Auth State Listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
 
@@ -154,7 +156,9 @@ const AppWithAuth = () => {
     return <AuthComponent onAuthSuccess={setUser} />;
   }
 
-
+  // Wenn eingeloggt, zeige das eigentliche Cockpit
+  return <AICockpit />;
+};
 const AI_COCKPIT_CONFIG = {
   bots: {
     documentation: {
@@ -934,7 +938,6 @@ Oder Plain Text:
       )}
     </div>
   );
-};
 };
 
 // Exportiere die Hauptkomponente als App
