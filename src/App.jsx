@@ -478,13 +478,23 @@ const AICockpit = () => {
         timestamp: new Date().toISOString()
       };
 
+      // Aktuelle Supabase-Session holen, um JWT an n8n zu senden
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !sessionData?.session?.access_token) {
+        throw new Error('Keine gültige Supabase-Session gefunden. Bitte neu einloggen.');
+      }
+
+      const jwt = sessionData.session.access_token;
+
       const headers = {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        // JWT der aktuellen Supabase-Session an n8n senden
+        'Authorization': `Bearer ${jwt}`
       };
 
-      // API Key nur hinzufügen wenn vorhanden
+      // Optionalen eigenen API-Key zusätzlich senden (separater Header)
       if (apiConfig.apiKey && apiConfig.apiKey.trim()) {
-        headers['Authorization'] = `Bearer ${apiConfig.apiKey}`;
+        headers['x-api-key'] = apiConfig.apiKey.trim();
       }
 
       const response = await fetch(apiConfig.webhookUrl, {
@@ -557,12 +567,21 @@ const AICockpit = () => {
     setAddToDokuStatus(prev => ({ ...prev, [messageId]: 'loading' }));
 
     try {
+      // Aktuelle Supabase-Session holen, um JWT an n8n zu senden
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !sessionData?.session?.access_token) {
+        throw new Error('Keine gültige Supabase-Session gefunden. Bitte neu einloggen.');
+      }
+
+      const jwt = sessionData.session.access_token;
+
       const headers = {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${jwt}`
       };
 
       if (apiConfig.apiKey && apiConfig.apiKey.trim()) {
-        headers['Authorization'] = `Bearer ${apiConfig.apiKey}`;
+        headers['x-api-key'] = apiConfig.apiKey.trim();
       }
 
       const payload = {
