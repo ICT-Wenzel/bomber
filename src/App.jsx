@@ -648,7 +648,7 @@ const AICockpit = () => {
   return (
     <div
       className={`h-screen flex relative overflow-hidden ${
-        darkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'
+        darkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-900'
       }`}
     >
       {/* Hintergrund Gradients / Glows */}
@@ -667,7 +667,7 @@ const AICockpit = () => {
         <div className="flex items-center justify-center w-10 h-10 rounded-2xl mb-6 bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600 shadow-[0_12px_30px_rgba(16,185,129,0.8)]">
           <span className="text-xs font-semibold tracking-tight text-white">AI</span>
         </div>
-
+        
         {Object.values(AI_COCKPIT_CONFIG.bots).map(bot => {
           const Icon = bot.icon;
           const isActive = activeBot === bot.id;
@@ -717,7 +717,7 @@ const AICockpit = () => {
         >
           <div className="flex items-center gap-4">
             {/* Global Home Button */}
-            <button
+        <button
               onClick={() => setShowHome(true)}
               className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                 showHome
@@ -731,10 +731,14 @@ const AICockpit = () => {
             >
               <Home size={14} />
               <span>Home</span>
-            </button>
+        </button>
 
             <div
-              className={`w-10 h-10 rounded-2xl flex items-center justify-center text-white bg-gradient-to-br from-${currentBot.color}-400 via-${currentBot.color}-500 to-${currentBot.color}-600 shadow-[0_10px_30px_rgba(37,99,235,0.7)]`}
+              className={`w-10 h-10 rounded-2xl flex items-center justify-center text-white ${
+                darkMode
+                  ? `bg-gradient-to-br from-${currentBot.color}-400 via-${currentBot.color}-500 to-${currentBot.color}-600 shadow-[0_10px_30px_rgba(37,99,235,0.7)]`
+                  : 'bg-slate-900 text-slate-50 shadow-[0_8px_20px_rgba(15,23,42,0.4)]'
+              }`}
             >
               <BotIcon size={20} />
             </div>
@@ -778,7 +782,11 @@ const AICockpit = () => {
         <div className="flex-1 overflow-y-auto p-6">
           {showHome ? (
             <div className="h-full flex flex-col items-center justify-center">
-              <div className="w-full max-w-5xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div
+                className={`w-full max-w-5xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 ${
+                  darkMode ? '' : 'pb-4'
+                }`}
+              >
                 {Object.values(AI_COCKPIT_CONFIG.bots).map(bot => {
                   const Icon = bot.icon;
                   const isActive = activeBot === bot.id;
@@ -792,7 +800,7 @@ const AICockpit = () => {
                       className={`group relative overflow-hidden rounded-3xl text-left p-5 transition-all duration-200 border ${
                         darkMode
                           ? 'bg-slate-900/70 border-slate-800 hover:border-slate-500 hover:bg-slate-900'
-                          : 'bg-white/90 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                          : 'bg-white border-slate-200 hover:border-emerald-300/80 hover:bg-emerald-50/40'
                       } shadow-[0_18px_40px_rgba(15,23,42,0.65)] hover:-translate-y-1`}
                     >
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
@@ -805,7 +813,7 @@ const AICockpit = () => {
                               ? 'bg-gradient-to-br from-sky-400 via-blue-500 to-cyan-400'
                               : bot.id === 'wiki'
                               ? 'bg-gradient-to-br from-emerald-400 via-teal-500 to-lime-400'
-                              : 'bg-gradient-to-br from-slate-300 via-slate-500 to-slate-700'
+                              : 'bg-slate-900'
                           } shadow-[0_10px_30px_rgba(56,189,248,0.7)]`}
                         >
                           <Icon size={22} />
@@ -835,7 +843,11 @@ const AICockpit = () => {
           ) : currentMessages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center">
               <div
-                className={`w-24 h-24 rounded-3xl flex items-center justify-center text-white mb-4 bg-gradient-to-br from-${currentBot.color}-400 via-${currentBot.color}-500 to-${currentBot.color}-600 shadow-[0_18px_45px_rgba(59,130,246,0.9)] animate-[pulse_3s_ease-in-out_infinite]`}
+                className={`w-24 h-24 rounded-3xl flex items-center justify-center text-white mb-4 ${
+                  darkMode
+                    ? `bg-gradient-to-br from-${currentBot.color}-400 via-${currentBot.color}-500 to-${currentBot.color}-600 shadow-[0_18px_45px_rgba(59,130,246,0.9)]`
+                    : 'bg-slate-900 shadow-[0_18px_45px_rgba(15,23,42,0.55)]'
+                } animate-[pulse_3s_ease-in-out_infinite]`}
               >
                 <BotIcon size={40} />
               </div>
@@ -873,7 +885,7 @@ const AICockpit = () => {
                         ? 'bg-red-500/10 border-red-500/30'
                         : darkMode
                         ? 'bg-slate-900/70 border-slate-700/70 shadow-[0_12px_35px_rgba(15,23,42,0.9)]'
-                        : 'bg-white/90 border-slate-200 shadow-[0_10px_25px_rgba(148,163,184,0.5)]'
+                        : 'bg-slate-50 border-slate-200 shadow-[0_8px_20px_rgba(148,163,184,0.35)]'
                     } transition-transform duration-150 hover:-translate-y-0.5`}
                   >
                     <div className="prose prose-sm max-w-none" style={{ color: 'inherit' }}>
@@ -956,7 +968,7 @@ const AICockpit = () => {
         {!showHome && (
           <div
             className={`${
-              darkMode ? 'bg-slate-900/80 border-slate-800/80' : 'bg-white/90 border-slate-200/80'
+              darkMode ? 'bg-slate-900/80 border-slate-800/80' : 'bg-white border-slate-200/80'
             } border-t p-4 backdrop-blur-2xl shadow-[0_-12px_35px_rgba(15,23,42,0.9)]`}
           >
           <div className="max-w-4xl mx-auto flex gap-3">
