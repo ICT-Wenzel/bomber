@@ -54,8 +54,14 @@ const AuthComponent = ({ onAuthSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <div className="bg-gray-800 p-8 rounded-2xl shadow-xl w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
+      {/* Subtiles Hintergrund-Glow */}
+      <div className="pointer-events-none absolute inset-0 opacity-40">
+        <div className="absolute -top-32 -left-32 w-72 h-72 bg-blue-500/30 blur-3xl rounded-full animate-pulse" />
+        <div className="absolute -bottom-32 -right-32 w-72 h-72 bg-indigo-500/30 blur-3xl rounded-full animate-pulse" />
+      </div>
+
+      <div className="relative bg-slate-900/70 border border-white/10 backdrop-blur-2xl p-8 rounded-3xl shadow-[0_18px_60px_rgba(15,23,42,0.9)] w-full max-w-md">
         <h2 className="text-2xl font-bold text-white mb-6 text-center">
           {isSignUp ? '🚀 Registrieren' : '🔐 Anmelden'}
         </h2>
@@ -65,40 +71,47 @@ const AuthComponent = ({ onAuthSuccess }) => {
             <label className="block text-sm font-medium text-gray-300 mb-2">
               E-Mail
             </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="deine@email.com"
-            />
+            <div className="relative group">
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/30 to-cyan-400/20 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 blur" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="relative w-full px-4 py-3 rounded-xl bg-slate-800/70 text-white placeholder-gray-400 outline-none border border-slate-700/80 focus:border-blue-400/80 focus:ring-2 focus:ring-blue-500/60 transition-all duration-200"
+                placeholder="deine@email.com"
+              />
+            </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Passwort
             </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="••••••••"
-            />
+            <div className="relative group">
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/30 to-purple-500/20 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 blur" />
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="relative w-full px-4 py-3 rounded-xl bg-slate-800/70 text-white placeholder-gray-400 outline-none border border-slate-700/80 focus:border-indigo-400/80 focus:ring-2 focus:ring-indigo-500/60 transition-all duration-200"
+                placeholder="••••••••"
+              />
+            </div>
           </div>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-              <p className="text-red-400 text-sm">{error}</p>
+            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 flex items-center gap-2">
+              <AlertCircle className="text-red-400" size={16} />
+              <p className="text-red-300 text-sm">{error}</p>
             </div>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-400 hover:from-blue-500 hover:via-indigo-400 hover:to-cyan-300 text-white font-semibold py-3 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_10px_30px_rgba(59,130,246,0.6)] hover:shadow-[0_15px_45px_rgba(79,70,229,0.8)] active:scale-[0.98]"
           >
             {loading ? 'Lädt...' : (isSignUp ? 'Registrieren' : 'Anmelden')}
           </button>
@@ -659,10 +672,27 @@ const AICockpit = () => {
   const colors = colorClasses[currentBot.color];
 
   return (
-    <div className={`h-screen flex ${darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
+    <div
+      className={`h-screen flex relative overflow-hidden ${
+        darkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-900'
+      }`}
+    >
+      {/* Hintergrund Gradients / Glows */}
+      <div className="pointer-events-none absolute inset-0 opacity-60">
+        <div className="absolute -top-40 left-0 w-80 h-80 bg-blue-500/20 blur-3xl rounded-full" />
+        <div className="absolute top-40 -right-24 w-72 h-72 bg-purple-500/20 blur-3xl rounded-full" />
+        <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-cyan-400/10 blur-3xl rounded-full" />
+      </div>
+
       {/* Sidebar */}
-      <div className={`w-20 ${darkMode ? 'bg-gray-800' : 'bg-white'} border-r ${darkMode ? 'border-gray-700' : 'border-gray-200'} flex flex-col items-center py-6 gap-4`}>
-        <div className="text-2xl font-bold mb-4">🤖</div>
+      <div
+        className={`relative z-10 w-20 ${
+          darkMode ? 'bg-slate-900/70' : 'bg-white/70'
+        } border-r border-white/5 backdrop-blur-2xl flex flex-col items-center py-6 gap-4 shadow-[0_0_35px_rgba(15,23,42,0.8)]`}
+      >
+        <div className="text-2xl font-semibold mb-4 select-none bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent drop-shadow">
+          🤖
+        </div>
         
         {Object.values(AI_COCKPIT_CONFIG.bots).map(bot => {
           const Icon = bot.icon;
@@ -673,10 +703,10 @@ const AICockpit = () => {
             <button
               key={bot.id}
               onClick={() => setActiveBot(bot.id)}
-              className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+              className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-200 ${
                 isActive 
-                  ? `${botColors.bg} text-white shadow-lg scale-110` 
-                  : `${darkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-600'} hover:scale-105`
+                  ? `bg-gradient-to-br from-${bot.color}-400 via-${bot.color}-500 to-${bot.color}-600 text-white shadow-[0_12px_30px_rgba(59,130,246,0.7)] scale-110` 
+                  : `${darkMode ? 'bg-slate-800/70 text-slate-400' : 'bg-slate-100 text-slate-600'} hover:scale-105 hover:-translate-y-0.5`
               }`}
               title={bot.name}
             >
@@ -689,32 +719,48 @@ const AICockpit = () => {
         
         <button
           onClick={() => setDarkMode(!darkMode)}
-          className={`w-12 h-12 rounded-xl flex items-center justify-center ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'} transition-colors`}
+          className={`w-12 h-12 rounded-2xl flex items-center justify-center border border-white/10 shadow-lg transition-all duration-200 ${
+            darkMode
+              ? 'bg-slate-800/80 hover:bg-slate-700'
+              : 'bg-white/80 hover:bg-slate-100'
+          }`}
           title={darkMode ? 'Light Mode' : 'Dark Mode'}
         >
-          {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+          {darkMode ? <Sun size={20} className="text-amber-300" /> : <Moon size={20} className="text-slate-700" />}
         </button>
         
         <button
           onClick={() => setShowSettings(!showSettings)}
-          className={`w-12 h-12 rounded-xl flex items-center justify-center ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'} transition-colors`}
+          className={`w-12 h-12 rounded-2xl flex items-center justify-center border border-white/10 shadow-lg transition-all duration-200 ${
+            darkMode
+              ? 'bg-slate-800/80 hover:bg-slate-700'
+              : 'bg-white/80 hover:bg-slate-100'
+          }`}
           title="Einstellungen"
         >
-          <Settings size={20} />
+          <Settings size={20} className="text-slate-200" />
         </button>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="relative z-10 flex-1 flex flex-col">
         {/* Header */}
-        <div className={`h-16 ${darkMode ? 'bg-gray-800' : 'bg-white'} border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'} flex items-center justify-between px-6`}>
+        <div
+          className={`h-16 ${
+            darkMode ? 'bg-slate-900/70' : 'bg-white/70'
+          } border-b border-white/5 flex items-center justify-between px-6 backdrop-blur-2xl shadow-[0_10px_30px_rgba(15,23,42,0.7)]`}
+        >
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 ${colors.bg} rounded-lg flex items-center justify-center text-white`}>
+            <div
+              className={`w-10 h-10 rounded-2xl flex items-center justify-center text-white bg-gradient-to-br from-${currentBot.color}-400 via-${currentBot.color}-500 to-${currentBot.color}-600 shadow-[0_10px_30px_rgba(37,99,235,0.7)]`}
+            >
               <BotIcon size={20} />
             </div>
             <div>
-              <h1 className="text-lg font-semibold">{currentBot.name}</h1>
-              <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              <h1 className="text-lg font-semibold tracking-tight">
+                {currentBot.name}
+              </h1>
+              <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                 {currentBot.description}
               </p>
             </div>
@@ -724,7 +770,9 @@ const AICockpit = () => {
             <button
               onClick={exportHistory}
               disabled={currentMessages.length === 0}
-              className={`p-2 rounded-lg ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
+              className={`p-2 rounded-xl border border-white/10 ${
+                darkMode ? 'bg-slate-800/70 hover:bg-slate-700/80' : 'bg-white/80 hover:bg-slate-100'
+              } disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md`}
               title="Verlauf exportieren"
             >
               <Download size={20} />
@@ -732,7 +780,9 @@ const AICockpit = () => {
             <button
               onClick={clearHistory}
               disabled={currentMessages.length === 0}
-              className={`p-2 rounded-lg ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
+              className={`p-2 rounded-xl border border-white/10 ${
+                darkMode ? 'bg-slate-800/70 hover:bg-slate-700/80' : 'bg-white/80 hover:bg-slate-100'
+              } disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md`}
               title="Verlauf löschen"
             >
               <Trash2 size={20} />
@@ -744,14 +794,16 @@ const AICockpit = () => {
         <div className="flex-1 overflow-y-auto p-6">
           {currentMessages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center">
-              <div className={`w-20 h-20 ${colors.bg} rounded-2xl flex items-center justify-center text-white mb-4`}>
+              <div
+                className={`w-24 h-24 rounded-3xl flex items-center justify-center text-white mb-4 bg-gradient-to-br from-${currentBot.color}-400 via-${currentBot.color}-500 to-${currentBot.color}-600 shadow-[0_18px_45px_rgba(59,130,246,0.9)] animate-[pulse_3s_ease-in-out_infinite]`}
+              >
                 <BotIcon size={40} />
               </div>
               <h2 className="text-2xl font-semibold mb-2">{currentBot.name}</h2>
-              <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
+              <p className={darkMode ? 'text-slate-400' : 'text-slate-600'}>
                 {currentBot.description}
               </p>
-              <p className={`mt-4 text-sm ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+              <p className={`mt-4 text-sm ${darkMode ? 'text-slate-500' : 'text-slate-500'}`}>
                 Starte eine Konversation...
               </p>
             </div>
@@ -763,20 +815,26 @@ const AICockpit = () => {
                   className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {msg.role === 'assistant' && (
-                    <div className={`w-8 h-8 ${msg.isError ? 'bg-red-500' : colors.bg} rounded-lg flex items-center justify-center text-white flex-shrink-0`}>
+                    <div
+                      className={`w-8 h-8 ${
+                        msg.isError
+                          ? 'bg-red-500'
+                          : `${colors.bg}`
+                      } rounded-2xl flex items-center justify-center text-white flex-shrink-0 shadow-md`}
+                    >
                       <BotIcon size={16} />
                     </div>
                   )}
                   <div
-                    className={`max-w-2xl rounded-2xl px-4 py-3 ${
+                    className={`max-w-2xl rounded-3xl px-4 py-3 border ${
                       msg.role === 'user'
-                        ? `${colors.bg} text-white`
+                        ? `bg-gradient-to-br from-${currentBot.color}-500 via-${currentBot.color}-600 to-${currentBot.color}-500 text-white border-transparent shadow-[0_10px_30px_rgba(59,130,246,0.8)]`
                         : msg.isError
-                        ? 'bg-red-500/10 border border-red-500/20'
+                        ? 'bg-red-500/10 border-red-500/30'
                         : darkMode
-                        ? 'bg-gray-800'
-                        : 'bg-white border border-gray-200'
-                    }`}
+                        ? 'bg-slate-900/70 border-slate-700/70 shadow-[0_12px_35px_rgba(15,23,42,0.9)]'
+                        : 'bg-white/90 border-slate-200 shadow-[0_10px_25px_rgba(148,163,184,0.5)]'
+                    } transition-transform duration-150 hover:-translate-y-0.5`}
                   >
                     <div className="prose prose-sm max-w-none" style={{ color: 'inherit' }}>
                       {msg.role === 'assistant' ? (
@@ -786,7 +844,7 @@ const AICockpit = () => {
                       )}
                     </div>
                     {msg.metadata && (
-                      <div className={`mt-2 text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                      <div className={`mt-2 text-xs ${darkMode ? 'text-slate-500' : 'text-slate-500'}`}>
                         {msg.metadata.source && `📚 Quelle: ${msg.metadata.source}`}
                         {msg.metadata.confidence && ` • Confidence: ${msg.metadata.confidence}`}
                       </div>
@@ -801,17 +859,17 @@ const AICockpit = () => {
                               <button
                                 onClick={() => handleAddToDoku(msg, messageId)}
                                 disabled={status === 'loading'}
-                                className={`inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg border transition-colors ${
+                                className={`inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded-xl border transition-all duration-200 ${
                                   darkMode
-                                    ? 'border-gray-600 hover:bg-gray-700 disabled:hover:bg-gray-800'
-                                    : 'border-gray-300 hover:bg-gray-100'
-                                } disabled:opacity-60 disabled:cursor-not-allowed`}
+                                    ? 'border-slate-600/90 bg-slate-900/60 hover:bg-slate-800/80'
+                                    : 'border-slate-300 bg-slate-50/80 hover:bg-slate-100'
+                                } disabled:opacity-60 disabled:cursor-not-allowed shadow-sm`}
                               >
                                 {status === 'loading' ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />}
                                 <span>Add to Doku</span>
                               </button>
                               {status === 'success' && (
-                                <span className={`inline-flex items-center gap-1 text-sm ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+                                <span className={`inline-flex items-center gap-1 text-sm ${darkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
                                   <Check size={14} />
                                   Gespeichert
                                 </span>
@@ -832,10 +890,16 @@ const AICockpit = () => {
               ))}
               {isLoading && (
                 <div className="flex gap-3 justify-start">
-                  <div className={`w-8 h-8 ${colors.bg} rounded-lg flex items-center justify-center text-white flex-shrink-0`}>
+                  <div className={`w-8 h-8 ${colors.bg} rounded-2xl flex items-center justify-center text-white flex-shrink-0 shadow-md`}>
                     <BotIcon size={16} />
                   </div>
-                  <div className={`rounded-2xl px-4 py-3 ${darkMode ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}>
+                  <div
+                    className={`rounded-3xl px-4 py-3 border ${
+                      darkMode
+                        ? 'bg-slate-900/70 border-slate-700/80'
+                        : 'bg-white/90 border-slate-200'
+                    } shadow-[0_10px_25px_rgba(148,163,184,0.6)]`}
+                  >
                     <div className="flex items-center gap-2">
                       <Loader2 size={16} className="animate-spin" />
                       <span className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Verarbeitung...</span>
@@ -849,7 +913,11 @@ const AICockpit = () => {
         </div>
 
         {/* Input */}
-        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'} p-4`}>
+        <div
+          className={`${
+            darkMode ? 'bg-slate-900/80' : 'bg-white/80'
+          } border-t border-white/5 p-4 backdrop-blur-2xl shadow-[0_-12px_35px_rgba(15,23,42,0.9)]`}
+        >
           <div className="max-w-4xl mx-auto flex gap-3">
             <input
               type="text"
@@ -858,14 +926,16 @@ const AICockpit = () => {
               onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
               placeholder={`Nachricht an ${currentBot.name}...`}
               disabled={isLoading}
-              className={`flex-1 px-4 py-3 rounded-xl ${
-                darkMode ? 'bg-gray-700 text-white placeholder-gray-400' : 'bg-gray-100 text-gray-900 placeholder-gray-500'
-              } focus:outline-none focus:ring-2 ${colors.border} disabled:opacity-50 transition-all`}
+              className={`flex-1 px-4 py-3 rounded-2xl border ${
+                darkMode
+                  ? 'bg-slate-900/80 text-white placeholder-slate-500 border-slate-700/80 focus:border-blue-400/80'
+                  : 'bg-white/80 text-slate-900 placeholder-slate-400 border-slate-200 focus:border-blue-500/70'
+              } focus:outline-none focus:ring-2 ${colors.border} disabled:opacity-50 transition-all duration-200 shadow-[0_10px_30px_rgba(15,23,42,0.7)]`}
             />
             <button
               onClick={sendMessage}
               disabled={isLoading || !input.trim()}
-              className={`${colors.bg} ${colors.hover} text-white px-6 py-3 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center min-w-[60px]`}
+              className={`bg-gradient-to-r from-${currentBot.color}-400 via-${currentBot.color}-500 to-${currentBot.color}-600 ${colors.hover} text-white px-6 py-3 rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center min-w-[60px] shadow-[0_14px_35px_rgba(59,130,246,0.9)] active:scale-[0.97]`}
             >
               {isLoading ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
             </button>
@@ -875,9 +945,9 @@ const AICockpit = () => {
 
       {/* Settings Modal */}
       {showSettings && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowSettings(false)}>
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm" onClick={() => setShowSettings(false)}>
           <div
-            className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-6 max-w-md w-full`}
+            className={`${darkMode ? 'bg-slate-900/90' : 'bg-white/95'} rounded-3xl p-6 max-w-md w-full border border-white/10 shadow-[0_24px_80px_rgba(15,23,42,0.95)] backdrop-blur-2xl`}
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-semibold mb-4">⚙️ Webhook-Konfiguration</h2>
@@ -889,9 +959,11 @@ const AICockpit = () => {
                   value={apiConfig.webhookUrl}
                   onChange={(e) => setApiConfig(prev => ({ ...prev, webhookUrl: e.target.value }))}
                   placeholder="https://your-n8n-instance.com/webhook/ai-cockpit"
-                  className={`w-full px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  className={`w-full px-4 py-2 rounded-xl border ${
+                    darkMode ? 'bg-slate-900/80 border-slate-700 focus:border-blue-400' : 'bg-slate-50 border-slate-200 focus:border-blue-500'
+                  } focus:outline-none focus:ring-2 focus:ring-blue-500/70 transition-all duration-200`}
                 />
-                <p className={`text-xs mt-1 ${darkMode ? 'text-gray-500' : 'text-gray-600'}`}>
+                <p className={`text-xs mt-1 ${darkMode ? 'text-slate-500' : 'text-slate-600'}`}>
                   Alle Bots nutzen diesen Webhook
                 </p>
               </div>
@@ -902,16 +974,18 @@ const AICockpit = () => {
                   value={apiConfig.apiKey}
                   onChange={(e) => setApiConfig(prev => ({ ...prev, apiKey: e.target.value }))}
                   placeholder="Dein API-Key"
-                  className={`w-full px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  className={`w-full px-4 py-2 rounded-xl border ${
+                    darkMode ? 'bg-slate-900/80 border-slate-700 focus:border-indigo-400' : 'bg-slate-50 border-slate-200 focus:border-indigo-500'
+                  } focus:outline-none focus:ring-2 focus:ring-indigo-500/70 transition-all duration-200`}
                 />
-                <p className={`text-xs mt-1 ${darkMode ? 'text-gray-500' : 'text-gray-600'}`}>
+                <p className={`text-xs mt-1 ${darkMode ? 'text-slate-500' : 'text-slate-600'}`}>
                   Wird als Bearer Token gesendet
                 </p>
               </div>
               
-              <div className={`p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+              <div className={`p-3 rounded-xl ${darkMode ? 'bg-slate-900/80 border border-slate-700/70' : 'bg-slate-50 border border-slate-200'} `}>
                 <p className="text-xs font-medium mb-2">📤 Request Format:</p>
-                <pre className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} overflow-x-auto`}>
+                <pre className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'} overflow-x-auto`}>
 {`{
   "botType": "documentation",
   "message": "User message",
@@ -920,7 +994,7 @@ const AICockpit = () => {
                 </pre>
                 
                 <p className="text-xs font-medium mb-2 mt-3">📥 Response Format:</p>
-                <pre className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} overflow-x-auto`}>
+                <pre className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'} overflow-x-auto`}>
 {`n8n Array (Standard):
 [{
   "output": "Bot Antwort",
@@ -940,13 +1014,15 @@ Oder Plain Text:
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowSettings(false)}
-                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg transition-colors"
+                  className="flex-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-400 hover:from-blue-500 hover:via-indigo-400 hover:to-cyan-300 text-white py-2 rounded-xl transition-all duration-200 shadow-[0_10px_30px_rgba(59,130,246,0.7)] active:scale-[0.98]"
                 >
                   Speichern
                 </button>
                 <button
                   onClick={resetConfig}
-                  className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} transition-colors`}
+                  className={`px-4 py-2 rounded-xl border ${
+                    darkMode ? 'bg-slate-900/80 border-slate-700 hover:bg-slate-800' : 'bg-slate-100 border-slate-200 hover:bg-slate-200'
+                  } transition-all duration-200`}
                 >
                   Zurücksetzen
                 </button>
