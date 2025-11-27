@@ -73,14 +73,14 @@ const AuthComponent = ({ onAuthSuccess }) => {
             </label>
             <div className="relative group">
               <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/30 to-cyan-400/20 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 blur" />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
                 className="relative w-full px-4 py-3 rounded-xl bg-slate-800/70 text-white placeholder-gray-400 outline-none border border-slate-700/80 focus:border-blue-400/80 focus:ring-2 focus:ring-blue-500/60 transition-all duration-200"
-                placeholder="deine@email.com"
-              />
+              placeholder="deine@email.com"
+            />
             </div>
           </div>
 
@@ -90,14 +90,14 @@ const AuthComponent = ({ onAuthSuccess }) => {
             </label>
             <div className="relative group">
               <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/30 to-purple-500/20 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 blur" />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
                 className="relative w-full px-4 py-3 rounded-xl bg-slate-800/70 text-white placeholder-gray-400 outline-none border border-slate-700/80 focus:border-indigo-400/80 focus:ring-2 focus:ring-indigo-500/60 transition-all duration-200"
-                placeholder="••••••••"
-              />
+              placeholder="••••••••"
+            />
             </div>
           </div>
 
@@ -415,6 +415,7 @@ const AICockpit = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
+  const [showHome, setShowHome] = useState(true);
   const [addToDokuStatus, setAddToDokuStatus] = useState({});
   const messagesEndRef = useRef(null);
 
@@ -647,7 +648,7 @@ const AICockpit = () => {
   return (
     <div
       className={`h-screen flex relative overflow-hidden ${
-        darkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-900'
+        darkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'
       }`}
     >
       {/* Hintergrund Gradients / Glows */}
@@ -660,8 +661,8 @@ const AICockpit = () => {
       {/* Sidebar */}
       <div
         className={`relative z-10 w-20 ${
-          darkMode ? 'bg-slate-900/70' : 'bg-white/70'
-        } border-r border-white/5 backdrop-blur-2xl flex flex-col items-center py-6 gap-4 shadow-[0_0_35px_rgba(15,23,42,0.8)]`}
+          darkMode ? 'bg-slate-900/80 border-slate-800/80' : 'bg-white border-slate-200/80'
+        } border-r backdrop-blur-2xl flex flex-col items-center py-6 gap-4 shadow-[0_0_35px_rgba(15,23,42,0.8)]`}
       >
         <div className="text-2xl font-semibold mb-4 select-none bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent drop-shadow">
           🤖
@@ -708,8 +709,8 @@ const AICockpit = () => {
         {/* Header */}
         <div
           className={`h-16 ${
-            darkMode ? 'bg-slate-900/70' : 'bg-white/70'
-          } border-b border-white/5 flex items-center justify-between px-6 backdrop-blur-2xl shadow-[0_10px_30px_rgba(15,23,42,0.7)]`}
+            darkMode ? 'bg-slate-900/70 border-slate-800/80' : 'bg-white/80 border-slate-200/80'
+          } border-b flex items-center justify-between px-6 backdrop-blur-2xl shadow-[0_10px_30px_rgba(15,23,42,0.7)]`}
         >
           <div className="flex items-center gap-3">
             <div
@@ -719,21 +720,32 @@ const AICockpit = () => {
             </div>
             <div>
               <h1 className="text-lg font-semibold tracking-tight">
-                {currentBot.name}
+                {showHome ? 'AI Cockpit' : currentBot.name}
               </h1>
               <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                {currentBot.description}
+                {showHome ? 'Wähle einen Bot, um zu starten' : currentBot.description}
               </p>
             </div>
           </div>
           
-          <div className="flex gap-2">
+          {!showHome && (
+            <div className="flex gap-2 items-center">
+              <button
+                onClick={() => setShowHome(true)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-medium border ${
+                  darkMode
+                    ? 'border-slate-700 text-slate-300 hover:bg-slate-800/80'
+                    : 'border-slate-200 text-slate-600 hover:bg-slate-100'
+                } transition-colors`}
+              >
+                Home
+              </button>
             <button
               onClick={exportHistory}
               disabled={currentMessages.length === 0}
-              className={`p-2 rounded-xl border border-white/10 ${
-                darkMode ? 'bg-slate-800/70 hover:bg-slate-700/80' : 'bg-white/80 hover:bg-slate-100'
-              } disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md`}
+                className={`p-2 rounded-xl border border-white/10 ${
+                  darkMode ? 'bg-slate-800/70 hover:bg-slate-700/80' : 'bg-white/80 hover:bg-slate-100'
+                } disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md`}
               title="Verlauf exportieren"
             >
               <Download size={20} />
@@ -741,19 +753,76 @@ const AICockpit = () => {
             <button
               onClick={clearHistory}
               disabled={currentMessages.length === 0}
-              className={`p-2 rounded-xl border border-white/10 ${
-                darkMode ? 'bg-slate-800/70 hover:bg-slate-700/80' : 'bg-white/80 hover:bg-slate-100'
-              } disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md`}
+                className={`p-2 rounded-xl border border-white/10 ${
+                  darkMode ? 'bg-slate-800/70 hover:bg-slate-700/80' : 'bg-white/80 hover:bg-slate-100'
+                } disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md`}
               title="Verlauf löschen"
             >
               <Trash2 size={20} />
             </button>
           </div>
+          )}
         </div>
 
-        {/* Messages */}
+        {/* Content Area */}
         <div className="flex-1 overflow-y-auto p-6">
-          {currentMessages.length === 0 ? (
+          {showHome ? (
+            <div className="h-full flex flex-col items-center justify-center">
+              <div className="w-full max-w-5xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Object.values(AI_COCKPIT_CONFIG.bots).map(bot => {
+                  const Icon = bot.icon;
+                  const isActive = activeBot === bot.id;
+                  return (
+                    <button
+                      key={bot.id}
+                      onClick={() => {
+                        setActiveBot(bot.id);
+                        setShowHome(false);
+                      }}
+                      className={`group relative overflow-hidden rounded-3xl text-left p-5 transition-all duration-200 border ${
+                        darkMode
+                          ? 'bg-slate-900/70 border-slate-800 hover:border-slate-500 hover:bg-slate-900'
+                          : 'bg-white/90 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                      } shadow-[0_18px_40px_rgba(15,23,42,0.65)] hover:-translate-y-1`}
+                    >
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-400/20 blur-3xl rounded-full" />
+                      </div>
+                      <div className="relative flex items-center justify-between mb-4">
+                        <div
+                          className={`w-10 h-10 rounded-2xl flex items-center justify-center text-white ${
+                            bot.id === 'documentation'
+                              ? 'bg-gradient-to-br from-sky-400 via-blue-500 to-cyan-400'
+                              : bot.id === 'wiki'
+                              ? 'bg-gradient-to-br from-emerald-400 via-teal-500 to-lime-400'
+                              : 'bg-gradient-to-br from-slate-300 via-slate-500 to-slate-700'
+                          } shadow-[0_10px_30px_rgba(56,189,248,0.7)]`}
+                        >
+                          <Icon size={22} />
+                        </div>
+                        {isActive && (
+                          <span className="text-xs px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/40">
+                            Aktiver Bot
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="relative text-lg font-semibold mb-1">{bot.name}</h3>
+                      <p className={`relative text-sm mb-4 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                        {bot.description}
+                      </p>
+                      <div className="relative flex items-center justify-between text-xs text-slate-500">
+                        <span>{bot.botType === 'documentation' ? 'Doku & Specs' : bot.botType === 'wiki' ? 'Wissensbasis' : 'Allgemeine Tasks'}</span>
+                        <span className="inline-flex items-center gap-1">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          Öffnen
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : currentMessages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center">
               <div
                 className={`w-24 h-24 rounded-3xl flex items-center justify-center text-white mb-4 bg-gradient-to-br from-${currentBot.color}-400 via-${currentBot.color}-500 to-${currentBot.color}-600 shadow-[0_18px_45px_rgba(59,130,246,0.9)] animate-[pulse_3s_ease-in-out_infinite]`}
@@ -874,11 +943,12 @@ const AICockpit = () => {
         </div>
 
         {/* Input */}
-        <div
-          className={`${
-            darkMode ? 'bg-slate-900/80' : 'bg-white/80'
-          } border-t border-white/5 p-4 backdrop-blur-2xl shadow-[0_-12px_35px_rgba(15,23,42,0.9)]`}
-        >
+        {!showHome && (
+          <div
+            className={`${
+              darkMode ? 'bg-slate-900/80 border-slate-800/80' : 'bg-white/90 border-slate-200/80'
+            } border-t p-4 backdrop-blur-2xl shadow-[0_-12px_35px_rgba(15,23,42,0.9)]`}
+          >
           <div className="max-w-4xl mx-auto flex gap-3">
             <input
               type="text"
@@ -887,21 +957,22 @@ const AICockpit = () => {
               onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
               placeholder={`Nachricht an ${currentBot.name}...`}
               disabled={isLoading}
-              className={`flex-1 px-4 py-3 rounded-2xl border ${
-                darkMode
-                  ? 'bg-slate-900/80 text-white placeholder-slate-500 border-slate-700/80 focus:border-blue-400/80'
-                  : 'bg-white/80 text-slate-900 placeholder-slate-400 border-slate-200 focus:border-blue-500/70'
-              } focus:outline-none focus:ring-2 ${colors.border} disabled:opacity-50 transition-all duration-200 shadow-[0_10px_30px_rgba(15,23,42,0.7)]`}
+                className={`flex-1 px-4 py-3 rounded-2xl border ${
+                  darkMode
+                    ? 'bg-slate-900/80 text-white placeholder-slate-500 border-slate-700/80 focus:border-blue-400/80'
+                    : 'bg-white text-slate-900 placeholder-slate-400 border-slate-200 focus:border-emerald-500/70'
+                } focus:outline-none focus:ring-2 ${colors.border} disabled:opacity-50 transition-all duration-200 shadow-[0_10px_30px_rgba(15,23,42,0.7)]`}
             />
             <button
               onClick={sendMessage}
               disabled={isLoading || !input.trim()}
-              className={`bg-gradient-to-r from-${currentBot.color}-400 via-${currentBot.color}-500 to-${currentBot.color}-600 ${colors.hover} text-white px-6 py-3 rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center min-w-[60px] shadow-[0_14px_35px_rgba(59,130,246,0.9)] active:scale-[0.97]`}
+                className={`bg-gradient-to-r from-${currentBot.color}-400 via-${currentBot.color}-500 to-${currentBot.color}-600 ${colors.hover} text-white px-6 py-3 rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center min-w-[60px] shadow-[0_14px_35px_rgba(59,130,246,0.9)] active:scale-[0.97]`}
             >
               {isLoading ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
             </button>
           </div>
         </div>
+        )}
       </div>
 
     </div>
