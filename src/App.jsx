@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, FileText, Book, Send, Trash2, Download, Moon, Sun, Loader2, Check, AlertCircle } from 'lucide-react';
+import { MessageSquare, FileText, Book, Send, Trash2, Download, Moon, Sun, Loader2, Check, AlertCircle, Home } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase Client initialisieren
@@ -652,22 +652,22 @@ const AICockpit = () => {
       }`}
     >
       {/* Hintergrund Gradients / Glows */}
-      <div className="pointer-events-none absolute inset-0 opacity-60">
-        <div className="absolute -top-40 left-0 w-80 h-80 bg-blue-500/20 blur-3xl rounded-full" />
-        <div className="absolute top-40 -right-24 w-72 h-72 bg-purple-500/20 blur-3xl rounded-full" />
-        <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-cyan-400/10 blur-3xl rounded-full" />
+      <div className="pointer-events-none absolute inset-0 opacity-70">
+        <div className="absolute -top-40 -left-10 w-80 h-80 bg-emerald-500/18 blur-3xl rounded-full" />
+        <div className="absolute top-40 -right-24 w-72 h-72 bg-emerald-400/10 blur-3xl rounded-full" />
+        <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-cyan-400/12 blur-3xl rounded-full" />
       </div>
 
       {/* Sidebar */}
       <div
         className={`relative z-10 w-20 ${
-          darkMode ? 'bg-slate-900/80 border-slate-800/80' : 'bg-white border-slate-200/80'
-        } border-r backdrop-blur-2xl flex flex-col items-center py-6 gap-4 shadow-[0_0_35px_rgba(15,23,42,0.8)]`}
+          darkMode ? 'bg-slate-950/90 border-slate-900' : 'bg-slate-900/5 border-slate-200/70'
+        } border-r backdrop-blur-2xl flex flex-col items-center py-6 gap-4 shadow-[0_0_40px_rgba(15,23,42,0.85)]`}
       >
-        <div className="text-2xl font-semibold mb-4 select-none bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent drop-shadow">
-          🤖
+        <div className="flex items-center justify-center w-10 h-10 rounded-2xl mb-6 bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600 shadow-[0_12px_30px_rgba(16,185,129,0.8)]">
+          <span className="text-xs font-semibold tracking-tight text-white">AI</span>
         </div>
-        
+
         {Object.values(AI_COCKPIT_CONFIG.bots).map(bot => {
           const Icon = bot.icon;
           const isActive = activeBot === bot.id;
@@ -676,10 +676,13 @@ const AICockpit = () => {
           return (
             <button
               key={bot.id}
-              onClick={() => setActiveBot(bot.id)}
+              onClick={() => {
+                setActiveBot(bot.id);
+                setShowHome(false);
+              }}
               className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-200 ${
                 isActive 
-                  ? `bg-gradient-to-br from-${bot.color}-400 via-${bot.color}-500 to-${bot.color}-600 text-white shadow-[0_12px_30px_rgba(59,130,246,0.7)] scale-110` 
+                  ? `bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600 text-white shadow-[0_12px_32px_rgba(16,185,129,0.85)] scale-110` 
                   : `${darkMode ? 'bg-slate-800/70 text-slate-400' : 'bg-slate-100 text-slate-600'} hover:scale-105 hover:-translate-y-0.5`
               }`}
               title={bot.name}
@@ -712,7 +715,24 @@ const AICockpit = () => {
             darkMode ? 'bg-slate-900/70 border-slate-800/80' : 'bg-white/80 border-slate-200/80'
           } border-b flex items-center justify-between px-6 backdrop-blur-2xl shadow-[0_10px_30px_rgba(15,23,42,0.7)]`}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
+            {/* Global Home Button */}
+            <button
+              onClick={() => setShowHome(true)}
+              className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                showHome
+                  ? darkMode
+                    ? 'bg-emerald-500/10 border-emerald-400/60 text-emerald-200'
+                    : 'bg-emerald-500/5 border-emerald-400/70 text-emerald-700'
+                  : darkMode
+                  ? 'border-slate-700 text-slate-300 hover:bg-slate-800/80'
+                  : 'border-slate-200 text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <Home size={14} />
+              <span>Home</span>
+            </button>
+
             <div
               className={`w-10 h-10 rounded-2xl flex items-center justify-center text-white bg-gradient-to-br from-${currentBot.color}-400 via-${currentBot.color}-500 to-${currentBot.color}-600 shadow-[0_10px_30px_rgba(37,99,235,0.7)]`}
             >
@@ -730,16 +750,6 @@ const AICockpit = () => {
           
           {!showHome && (
             <div className="flex gap-2 items-center">
-              <button
-                onClick={() => setShowHome(true)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-medium border ${
-                  darkMode
-                    ? 'border-slate-700 text-slate-300 hover:bg-slate-800/80'
-                    : 'border-slate-200 text-slate-600 hover:bg-slate-100'
-                } transition-colors`}
-              >
-                Home
-              </button>
             <button
               onClick={exportHistory}
               disabled={currentMessages.length === 0}
