@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, FileText, Book, Send, Trash2, Download, Moon, Sun, Settings, Loader2, Check, AlertCircle } from 'lucide-react';
+import { MessageSquare, FileText, Book, Send, Trash2, Download, Moon, Sun, Loader2, Check, AlertCircle } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase Client initialisieren
@@ -415,11 +415,6 @@ const AICockpit = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
-  const [showSettings, setShowSettings] = useState(false);
-  const [apiConfig, setApiConfig] = useState({
-    webhookUrl: ENV_CONFIG.N8N_WEBHOOK_URL,
-    apiKey: ENV_CONFIG.N8N_API_KEY
-  });
   const [addToDokuStatus, setAddToDokuStatus] = useState({});
   const messagesEndRef = useRef(null);
 
@@ -427,15 +422,6 @@ const AICockpit = () => {
   useEffect(() => {
     const saved = localStorage.getItem('aiCockpitMessages');
     if (saved) setMessages(JSON.parse(saved));
-    
-    const savedConfig = localStorage.getItem('aiCockpitConfig');
-    if (savedConfig) {
-      const parsed = JSON.parse(savedConfig);
-      setApiConfig({
-        webhookUrl: parsed.webhookUrl || ENV_CONFIG.N8N_WEBHOOK_URL,
-        apiKey: parsed.apiKey || ENV_CONFIG.N8N_API_KEY
-      });
-    }
     
     const savedTheme = localStorage.getItem('aiCockpitTheme');
     if (savedTheme) setDarkMode(savedTheme === 'dark');
@@ -445,10 +431,6 @@ const AICockpit = () => {
   useEffect(() => {
     localStorage.setItem('aiCockpitMessages', JSON.stringify(messages));
   }, [messages]);
-
-  useEffect(() => {
-    localStorage.setItem('aiCockpitConfig', JSON.stringify(apiConfig));
-  }, [apiConfig]);
 
   useEffect(() => {
     localStorage.setItem('aiCockpitTheme', darkMode ? 'dark' : 'light');
@@ -505,12 +487,12 @@ const AICockpit = () => {
         'Authorization': `Bearer ${jwt}`
       };
 
-      // Optionalen eigenen API-Key zusätzlich senden (separater Header)
-      if (apiConfig.apiKey && apiConfig.apiKey.trim()) {
-        headers['x-api-key'] = apiConfig.apiKey.trim();
+      // Optionalen eigenen API-Key zusätzlich senden (separater Header aus ENV)
+      if (ENV_CONFIG.N8N_API_KEY && ENV_CONFIG.N8N_API_KEY.trim()) {
+        headers['x-api-key'] = ENV_CONFIG.N8N_API_KEY.trim();
       }
 
-      const response = await fetch(apiConfig.webhookUrl, {
+      const response = await fetch(ENV_CONFIG.N8N_WEBHOOK_URL, {
         method: 'POST',
         headers,
         body: JSON.stringify(payload)
@@ -593,8 +575,8 @@ const AICockpit = () => {
         'Authorization': `Bearer ${jwt}`
       };
 
-      if (apiConfig.apiKey && apiConfig.apiKey.trim()) {
-        headers['x-api-key'] = apiConfig.apiKey.trim();
+      if (ENV_CONFIG.N8N_API_KEY && ENV_CONFIG.N8N_API_KEY.trim()) {
+        headers['x-api-key'] = ENV_CONFIG.N8N_API_KEY.trim();
       }
 
       const payload = {
@@ -603,7 +585,7 @@ const AICockpit = () => {
         timestamp: new Date().toISOString()
       };
 
-      const response = await fetch(apiConfig.webhookUrl, {
+      const response = await fetch(ENV_CONFIG.N8N_WEBHOOK_URL, {
         method: 'POST',
         headers,
         body: JSON.stringify(payload)
@@ -648,15 +630,6 @@ const AICockpit = () => {
     a.href = url;
     a.download = `${activeBot}-history-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
-  };
-
-  const resetConfig = () => {
-    if (confirm('Möchtest du die Konfiguration auf die Standard-Werte zurücksetzen?')) {
-      setApiConfig({
-        webhookUrl: ENV_CONFIG.N8N_WEBHOOK_URL,
-        apiKey: ENV_CONFIG.N8N_API_KEY
-      });
-    }
   };
 
   const currentMessages = messages[activeBot] || [];
@@ -727,18 +700,6 @@ const AICockpit = () => {
           title={darkMode ? 'Light Mode' : 'Dark Mode'}
         >
           {darkMode ? <Sun size={20} className="text-amber-300" /> : <Moon size={20} className="text-slate-700" />}
-        </button>
-        
-        <button
-          onClick={() => setShowSettings(!showSettings)}
-          className={`w-12 h-12 rounded-2xl flex items-center justify-center border border-white/10 shadow-lg transition-all duration-200 ${
-            darkMode
-              ? 'bg-slate-800/80 hover:bg-slate-700'
-              : 'bg-white/80 hover:bg-slate-100'
-          }`}
-          title="Einstellungen"
-        >
-          <Settings size={20} className="text-slate-200" />
         </button>
       </div>
 
@@ -943,94 +904,6 @@ const AICockpit = () => {
         </div>
       </div>
 
-      {/* Settings Modal */}
-      {showSettings && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm" onClick={() => setShowSettings(false)}>
-          <div
-            className={`${darkMode ? 'bg-slate-900/90' : 'bg-white/95'} rounded-3xl p-6 max-w-md w-full border border-white/10 shadow-[0_24px_80px_rgba(15,23,42,0.95)] backdrop-blur-2xl`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-xl font-semibold mb-4">⚙️ Webhook-Konfiguration</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">n8n Webhook URL</label>
-                <input
-                  type="text"
-                  value={apiConfig.webhookUrl}
-                  onChange={(e) => setApiConfig(prev => ({ ...prev, webhookUrl: e.target.value }))}
-                  placeholder="https://your-n8n-instance.com/webhook/ai-cockpit"
-                  className={`w-full px-4 py-2 rounded-xl border ${
-                    darkMode ? 'bg-slate-900/80 border-slate-700 focus:border-blue-400' : 'bg-slate-50 border-slate-200 focus:border-blue-500'
-                  } focus:outline-none focus:ring-2 focus:ring-blue-500/70 transition-all duration-200`}
-                />
-                <p className={`text-xs mt-1 ${darkMode ? 'text-slate-500' : 'text-slate-600'}`}>
-                  Alle Bots nutzen diesen Webhook
-                </p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">API Key (Optional)</label>
-                <input
-                  type="password"
-                  value={apiConfig.apiKey}
-                  onChange={(e) => setApiConfig(prev => ({ ...prev, apiKey: e.target.value }))}
-                  placeholder="Dein API-Key"
-                  className={`w-full px-4 py-2 rounded-xl border ${
-                    darkMode ? 'bg-slate-900/80 border-slate-700 focus:border-indigo-400' : 'bg-slate-50 border-slate-200 focus:border-indigo-500'
-                  } focus:outline-none focus:ring-2 focus:ring-indigo-500/70 transition-all duration-200`}
-                />
-                <p className={`text-xs mt-1 ${darkMode ? 'text-slate-500' : 'text-slate-600'}`}>
-                  Wird als Bearer Token gesendet
-                </p>
-              </div>
-              
-              <div className={`p-3 rounded-xl ${darkMode ? 'bg-slate-900/80 border border-slate-700/70' : 'bg-slate-50 border border-slate-200'} `}>
-                <p className="text-xs font-medium mb-2">📤 Request Format:</p>
-                <pre className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'} overflow-x-auto`}>
-{`{
-  "botType": "documentation",
-  "message": "User message",
-  "timestamp": "ISO date"
-}`}
-                </pre>
-                
-                <p className="text-xs font-medium mb-2 mt-3">📥 Response Format:</p>
-                <pre className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'} overflow-x-auto`}>
-{`n8n Array (Standard):
-[{
-  "output": "Bot Antwort",
-  "metadata": {...}
-}]
-
-Oder JSON Objekt:
-{
-  "response": "Bot Antwort"
-}
-
-Oder Plain Text:
-"Bot Antwort"`}
-                </pre>
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setShowSettings(false)}
-                  className="flex-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-400 hover:from-blue-500 hover:via-indigo-400 hover:to-cyan-300 text-white py-2 rounded-xl transition-all duration-200 shadow-[0_10px_30px_rgba(59,130,246,0.7)] active:scale-[0.98]"
-                >
-                  Speichern
-                </button>
-                <button
-                  onClick={resetConfig}
-                  className={`px-4 py-2 rounded-xl border ${
-                    darkMode ? 'bg-slate-900/80 border-slate-700 hover:bg-slate-800' : 'bg-slate-100 border-slate-200 hover:bg-slate-200'
-                  } transition-all duration-200`}
-                >
-                  Zurücksetzen
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
